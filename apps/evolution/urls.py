@@ -1,0 +1,19 @@
+from django.urls import path
+
+from .views import instance_status, whatsapp_dashboard
+
+
+app_name = "evolution"
+
+urlpatterns = [
+    path(
+        "dashboard/<str:location_id>/",
+        whatsapp_dashboard,
+        name="dashboard",
+    ),
+    path(
+        "api/status/<str:location_id>/",
+        instance_status,
+        name="instance-status",
+    ),
+]

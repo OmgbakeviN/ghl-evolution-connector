@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Connexion WhatsApp</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="min-h-screen bg-slate-100 text-slate-900">
+
+    <main class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+
+        <!-- En-tête -->
+        <header class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-wider text-emerald-600">
+                    Evolution Messaging
+                </p>
+
+                <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-950">
+                    Connexion WhatsApp
+                </h1>
+
+                <p class="mt-2 text-sm text-slate-500">
+                    Connectez le numéro WhatsApp de ce sous-compte HighLevel.
+                </p>
+            </div>
+
+            <button
+                id="refresh-button"
+                type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+                <svg
+                    id="refresh-icon"
+                    class="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <path d="M20 6v6h-6"></path>
+                    <path d="M4 18v-6h6"></path>
+                    <path d="M18.5 9A7 7 0 0 0 6 5.5L4 8"></path>
+                    <path d="M5.5 15A7 7 0 0 0 18 18.5l2-2.5"></path>
+                </svg>
+
+                <span id="refresh-label">Actualiser</span>
+            </button>
+        </header>
+
+        <!-- Erreur -->
+        <div
+            id="error-container"
+            class="{% if not error_message %}hidden {% endif %}mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        >
+            <p class="font-semibold">Une erreur est survenue</p>
+            <p id="error-message" class="mt-1 break-words">
+                {{ error_message }}
+            </p>
+        </div>
+
+        <div class="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+
+            <!-- Carte QR Code -->
+            <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-950">
+                            État de la connexion
+                        </h2>
+
+                        <p class="mt-1 text-sm text-slate-500">
+                            Le statut est vérifié automatiquement toutes les 10 secondes.
+                        </p>
+                    </div>
+
+                    <div
+                        id="status-badge"
+                        class="
+                            inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold
+
+                            {% if snapshot.status == 'open' %}
+                                bg-emerald-100 text-emerald-700
+                            {% elif snapshot.status == 'connecting' %}
+                                bg-amber-100 text-amber-700
+                            {% elif snapshot.status == 'error' %}
+                                bg-red-100 text-red-700
+                            {% else %}
+                                bg-slate-100 text-slate-700
+                            {% endif %}
+                        "
+                    >
+                        <span
+                            id="status-dot"
+                            class="
+                                h-2.5 w-2.5 rounded-full
+
+                                {% if snapshot.status == 'open' %}
+                                    bg-emerald-500
+                                {% elif snapshot.status == 'connecting' %}
+                                    bg-amber-500
+                                {% elif snapshot.status == 'error' %}
+                                    bg-red-500
+                                {% else %}
+                                    bg-slate-500
+                                {% endif %}
+                            "
+                        ></span>
+
+                        <span id="status-text">
+                            {% if snapshot.status == "open" %}
+                                Connecté
+                            {% elif snapshot.status == "connecting" %}
+                                En attente du scan
+                            {% elif snapshot.status == "close" %}
+                                Déconnecté
+                            {% elif snapshot.status == "error" %}
+                                Erreur
+                            {% else %}
+                                Instance créée
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+
+                    <!-- Connexion réussie -->
+                    <div
+                        id="connected-container"
+                        class="{% if not snapshot.is_connected %}hidden {% endif %}rounded-3xl border border-emerald-200 bg-emerald-50 px-6 py-12 text-center"
+                    >
+                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white">
+                            <svg
+                                class="h-8 w-8"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2.5"
+                            >
+                                <path d="m5 12 4 4L19 6"></path>
+                            </svg>
+                        </div>
+
+                        <h3 class="mt-5 text-2xl font-bold text-emerald-950">
+                            WhatsApp est connecté
+                        </h3>
+
+                        <p class="mx-auto mt-2 max-w-md text-sm text-emerald-700">
+                            Le numéro est maintenant associé à votre instance Evolution API.
+                        </p>
+                    </div>
+
+                    <!-- QR Code -->
+                    <div
+                        id="qr-container"
+                        class="{% if snapshot.is_connected %}hidden {% endif %}"
+                    >
+                        <div class="mx-auto max-w-sm rounded-3xl border border-slate-200 bg-slate-50 p-5">
+
+                            <div
+                                id="qr-loading"
+                                class="{% if snapshot.qr_source %}hidden {% endif %}flex aspect-square items-center justify-center rounded-2xl bg-white"
+                            >
+                                <div class="text-center">
+                                    <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900"></div>
+
+                                    <p class="mt-4 text-sm font-medium text-slate-500">
+                                        Chargement du QR Code…
+                                    </p>
+                                </div>
+                            </div>
+
+                            <img
+                                id="qr-image"
+                                src="{{ snapshot.qr_source }}"
+                                alt="QR Code de connexion WhatsApp"
+                                class="{% if not snapshot.qr_source %}hidden {% endif %}aspect-square w-full rounded-2xl bg-white object-contain"
+                            >
+                        </div>
+
+                        <div class="mx-auto mt-6 max-w-lg">
+                            <h3 class="text-center text-lg font-bold text-slate-950">
+                                Scanner avec WhatsApp
+                            </h3>
+
+                            <ol class="mt-4 space-y-3 text-sm text-slate-600">
+                                <li class="flex gap-3">
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
+                                        1
+                                    </span>
+                                    Ouvrez WhatsApp sur votre téléphone.
+                                </li>
+
+                                <li class="flex gap-3">
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
+                                        2
+                                    </span>
+                                    Ouvrez Appareils connectés.
+                                </li>
+
+                                <li class="flex gap-3">
+                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
+                                        3
+                                    </span>
+                                    Sélectionnez Connecter un appareil, puis scannez ce QR Code.
+                                </li>
+                            </ol>
+                        </div>
+
+                        <p
+                            id="qr-count"
+                            class="mt-5 text-center text-xs text-slate-400"
+                        >
+                            {% if snapshot.qr_count is not None %}
+                                QR disponible — compteur : {{ snapshot.qr_count }}
+                            {% endif %}
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Informations techniques -->
+            <aside class="space-y-6">
+
+                <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-950">
+                        Informations
+                    </h2>
+
+                    <dl class="mt-5 space-y-5">
+
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                Instance
+                            </dt>
+
+                            <dd class="mt-1 break-all text-sm font-medium text-slate-800">
+                                {{ evolution_instance.instance_name }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                Sous-compte HighLevel
+                            </dt>
+
+                            <dd class="mt-1 break-all text-sm font-medium text-slate-800">
+                                {{ installation.location_id }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                Intégration
+                            </dt>
+
+                            <dd class="mt-1 text-sm font-medium text-slate-800">
+                                {{ evolution_instance.integration }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                Dernière vérification
+                            </dt>
+
+                            <dd
+                                id="last-synced"
+                                class="mt-1 text-sm font-medium text-slate-800"
+                            >
+                                {% if snapshot.last_synced_at %}
+                                    {{ snapshot.last_synced_at|date:"d/m/Y H:i:s" }}
+                                {% else %}
+                                    Non disponible
+                                {% endif %}
+                            </dd>
+                        </div>
+
+                    </dl>
+                </section>
+
+                <section class="rounded-3xl border border-blue-200 bg-blue-50 p-6">
+                    <h2 class="font-bold text-blue-950">
+                        À savoir
+                    </h2>
+
+                    <p class="mt-2 text-sm leading-6 text-blue-800">
+                        Le QR Code est temporaire. S’il expire, cette page en récupère automatiquement un nouveau auprès d’Evolution API.
+                    </p>
+                </section>
+
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        const statusUrl = "{{ status_url|escapejs }}";
+
+        const refreshButton = document.getElementById("refresh-button");
+        const refreshIcon = document.getElementById("refresh-icon");
+        const refreshLabel = document.getElementById("refresh-label");
+
+        const statusBadge = document.getElementById("status-badge");
+        const statusDot = document.getElementById("status-dot");
+        const statusText = document.getElementById("status-text");
+
+        const qrContainer = document.getElementById("qr-container");
+        const qrImage = document.getElementById("qr-image");
+        const qrLoading = document.getElementById("qr-loading");
+        const qrCount = document.getElementById("qr-count");
+
+        const connectedContainer = document.getElementById(
+            "connected-container"
+        );
+
+        const errorContainer = document.getElementById(
+            "error-container"
+        );
+
+        const errorMessage = document.getElementById(
+            "error-message"
+        );
+
+        const lastSynced = document.getElementById("last-synced");
+
+        let isRefreshing = false;
+
+        const statusConfiguration = {
+            open: {
+                text: "Connecté",
+                badge: "bg-emerald-100 text-emerald-700",
+                dot: "bg-emerald-500",
+            },
+            connecting: {
+                text: "En attente du scan",
+                badge: "bg-amber-100 text-amber-700",
+                dot: "bg-amber-500",
+            },
+            close: {
+                text: "Déconnecté",
+                badge: "bg-slate-100 text-slate-700",
+                dot: "bg-slate-500",
+            },
+            created: {
+                text: "Instance créée",
+                badge: "bg-slate-100 text-slate-700",
+                dot: "bg-slate-500",
+            },
+            error: {
+                text: "Erreur",
+                badge: "bg-red-100 text-red-700",
+                dot: "bg-red-500",
+            },
+        };
+
+        function updateStatus(status) {
+            const config =
+                statusConfiguration[status]
+                || statusConfiguration.created;
+
+            statusText.textContent = config.text;
+
+            statusBadge.className =
+                "inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold "
+                + config.badge;
+
+            statusDot.className =
+                "h-2.5 w-2.5 rounded-full "
+                + config.dot;
+        }
+
+        function setLoading(loading) {
+            isRefreshing = loading;
+            refreshButton.disabled = loading;
+
+            refreshLabel.textContent = loading
+                ? "Actualisation…"
+                : "Actualiser";
+
+            refreshIcon.classList.toggle(
+                "animate-spin",
+                loading
+            );
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorContainer.classList.remove("hidden");
+        }
+
+        function hideError() {
+            errorContainer.classList.add("hidden");
+            errorMessage.textContent = "";
+        }
+
+        function updateInterface(data) {
+            updateStatus(data.status);
+
+            if (data.is_connected) {
+                connectedContainer.classList.remove("hidden");
+                qrContainer.classList.add("hidden");
+            } else {
+                connectedContainer.classList.add("hidden");
+                qrContainer.classList.remove("hidden");
+
+                if (data.qr_source) {
+                    qrImage.src = data.qr_source;
+                    qrImage.classList.remove("hidden");
+                    qrLoading.classList.add("hidden");
+                } else {
+                    qrImage.classList.add("hidden");
+                    qrLoading.classList.remove("hidden");
+                }
+
+                qrCount.textContent =
+                    data.qr_count !== null
+                        ? `QR disponible — compteur : ${data.qr_count}`
+                        : "";
+            }
+
+            if (data.last_synced_at) {
+                const date = new Date(data.last_synced_at);
+
+                lastSynced.textContent = date.toLocaleString(
+                    "fr-FR"
+                );
+            }
+        }
+
+        async function refreshStatus() {
+            if (isRefreshing) {
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                const response = await fetch(statusUrl, {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                    credentials: "same-origin",
+                    cache: "no-store",
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.message
+                        || "Impossible d'actualiser l'instance."
+                    );
+                }
+
+                hideError();
+                updateInterface(data);
+            } catch (error) {
+                updateStatus("error");
+                showError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        refreshButton.addEventListener(
+            "click",
+            refreshStatus
+        );
+
+        window.setInterval(
+            refreshStatus,
+            10000
+        );
+    </script>
+
+</body>
+</html>

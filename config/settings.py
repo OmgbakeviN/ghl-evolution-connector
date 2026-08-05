@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'apps.ghl.apps.GhlConfig',
+    'apps.evolution.apps.EvolutionConfig',
 ]
 
 MIDDLEWARE = [
@@ -149,3 +150,10 @@ GHL_API_VERSION = os.getenv("GHL_API_VERSION", "v3")
 
 GHL_TOKEN_URL = "https://services.leadconnectorhq.com/oauth/token"
 GHL_USER_TYPE = "Location"
+
+EVOLUTION_API_URL = os.getenv(
+    "EVOLUTION_API_URL", "",).rstrip("/")
+
+EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY", "")
+
+EVOLUTION_INTEGRATION = os.getenv("EVOLUTION_INTEGRATION", "WHATSAPP-BAILEYS")
