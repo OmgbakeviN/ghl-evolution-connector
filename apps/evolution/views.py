@@ -5,9 +5,15 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_safe
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from apps.ghl.models import GHLInstallation
+from apps.ghl.embedded_tokens import (
+    GHLEmbeddedTokenError,
+    GHLEmbeddedTokenExpired,
+    decode_embedded_token
+)
 
 from .client import EvolutionAPIError, EvolutionClient
 from .models import EvolutionInstance
@@ -270,3 +276,169 @@ def instance_status(request, location_id: str):
             ),
         }
     )
+
+@xframe_options_exempt
+@require_safe
+def embedded_dashboard(request):
+    """
+    Page temporaire utilisée pour vérifier l'intégration
+    de la Custom Page HighLevel.
+    """
+
+    return render(
+        request,
+        "evolution/embedded.html",
+    )
+
+def extract_bearer_token(request) -> str:
+    """
+    Extrait le jeton depuis :
+    Authorization: Bearer <token>
+    """
+
+    authorization = request.headers.get(
+        "Authorization",
+        "",
+    ).strip()
+
+    scheme, separator, token = authorization.partition(" ")
+
+    if (
+        separator != " "
+        or scheme.lower() != "bearer"
+        or not token.strip()
+    ):
+        return ""
+
+    return token.strip()
+
+
+@require_GET
+def embedded_instance_status(request):
+    """
+    Retourne le statut WhatsApp de la Location contenue
+    dans le jeton Django signé.
+
+    Aucun location_id n'est accepté dans l'URL.
+    """
+
+    token = extract_bearer_token(request)
+
+    if not token:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": (
+                    "Le jeton d'authentification "
+                    "de la Custom Page est absent."
+                ),
+            },
+            status=401,
+        )
+
+    try:
+        token_context = decode_embedded_token(token)
+
+    except GHLEmbeddedTokenExpired as exc:
+        return JsonResponse(
+            {
+                "success": False,
+                "code": "embedded_token_expired",
+                "message": str(exc),
+            },
+            status=401,
+        )
+
+    except GHLEmbeddedTokenError as exc:
+        return JsonResponse(
+            {
+                "success": False,
+                "code": "invalid_embedded_token",
+                "message": str(exc),
+            },
+            status=401,
+        )
+
+    location_id = token_context["location_id"]
+
+    installation = GHLInstallation.objects.filter(
+        location_id=location_id,
+        is_active=True,
+    ).first()
+
+    if installation is None:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": (
+                    "Aucune installation HighLevel active "
+                    "n'existe pour ce sous-compte."
+                ),
+            },
+            status=404,
+        )
+
+    try:
+        evolution_instance, _ = (
+            provision_evolution_instance(installation)
+        )
+
+        snapshot = get_instance_snapshot(
+            evolution_instance
+        )
+
+    except EvolutionAPIError as exc:
+        error_message = str(exc)
+
+        if exc.details:
+            error_message += f" — {exc.details}"
+
+        return JsonResponse(
+            {
+                "success": False,
+                "status": "error",
+                "message": error_message,
+            },
+            status=502,
+        )
+
+    last_synced_at = snapshot.get(
+        "last_synced_at"
+    )
+
+    response = JsonResponse(
+        {
+            "success": True,
+            "status": snapshot["status"],
+            "is_connected": snapshot["is_connected"],
+            "qr_source": snapshot["qr_source"],
+            "qr_count": snapshot["qr_count"],
+            "pairing_code": snapshot["pairing_code"],
+            "phone_number": snapshot["phone_number"],
+            "profile_name": snapshot["profile_name"],
+            "last_synced_at": (
+                last_synced_at.isoformat()
+                if last_synced_at
+                else None
+            ),
+            "instance": {
+                "name": evolution_instance.instance_name,
+                "integration": (
+                    evolution_instance.integration
+                ),
+            },
+            "location": {
+                "id": installation.location_id,
+            },
+            "user": {
+                "id": token_context["user_id"],
+                "role": token_context["role"],
+            },
+        }
+    )
+
+    response["Cache-Control"] = (
+        "no-store, no-cache, must-revalidate"
+    )
+
+    return response

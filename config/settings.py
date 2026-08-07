@@ -145,11 +145,19 @@ TIME_ZONE="Africa/Douala"
 # paramettres highlevel
 GHL_CLIENT_ID = os.getenv("GHL_CLIENT_ID", "")
 GHL_CLIENT_SECRET = os.getenv("GHL_CLIENT_SECRET", "")
+GHL_SHARED_SECRET = os.getenv("GHL_SHARED_SECRET","")
 GHL_REDIRECT_URI = os.getenv("GHL_REDIRECT_URI", "")
 GHL_API_VERSION = os.getenv("GHL_API_VERSION", "v3")
 
 GHL_TOKEN_URL = "https://services.leadconnectorhq.com/oauth/token"
 GHL_USER_TYPE = "Location"
+
+GHL_EMBEDDED_TOKEN_MAX_AGE = int(
+    os.getenv(
+        "GHL_EMBEDDED_TOKEN_MAX_AGE",
+        "3600",
+    )
+)
 
 EVOLUTION_API_URL = os.getenv(
     "EVOLUTION_API_URL", "",).rstrip("/")
