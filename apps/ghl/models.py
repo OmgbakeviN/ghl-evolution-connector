@@ -47,3 +47,4 @@ class GHLInstallation(models.Model):
 
     def __str__(self) -> str:
         return f"HighLevel installation - {self.location_id}"
+    

@@ -15,7 +15,11 @@ from .sso import (
     GHLUserContextError,
     decrypt_user_context
 )
-from .embedded_tokens import create_embedded_token
+from .embedded_tokens import (
+    create_embedded_token, GHLEmbeddedTokenError,
+    GHLEmbeddedTokenExpired, decode_embedded_token,
+)
+from .client import GHLClient, GHLAPIError
 
 import logging
 
@@ -274,4 +278,185 @@ def user_context(request):
             "embedded_token_expires_in": (settings.GHL_EMBEDDED_TOKEN_MAX_AGE, ),
         },
         status=status.HTTP_200_OK,
+    )
+
+
+def extract_bearer_token(request) -> str:
+    authorization = request.headers.get(
+        "Authorization",
+        "",
+    ).strip()
+
+    scheme, separator, token = authorization.partition(" ")
+
+    if (
+        separator != " "
+        or scheme.lower() != "bearer"
+        or not token.strip()
+    ):
+        return ""
+
+    return token.strip()
+
+
+@api_view(["GET"])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def embedded_contacts(request):
+    """
+    Retourne les contacts de la Location contenue
+    dans le token signé de la Custom Page.
+    """
+
+    token = extract_bearer_token(request)
+
+    if not token:
+        return Response(
+            {
+                "success": False,
+                "message": "Token de Custom Page absent.",
+            },
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    try:
+        token_context = decode_embedded_token(token)
+
+    except GHLEmbeddedTokenExpired as exc:
+        return Response(
+            {
+                "success": False,
+                "code": "embedded_token_expired",
+                "message": str(exc),
+            },
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    except GHLEmbeddedTokenError as exc:
+        return Response(
+            {
+                "success": False,
+                "code": "invalid_embedded_token",
+                "message": str(exc),
+            },
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    location_id = token_context["location_id"]
+
+    installation = GHLInstallation.objects.filter(
+        location_id=location_id,
+        is_active=True,
+    ).first()
+
+    if installation is None:
+        return Response(
+            {
+                "success": False,
+                "message": "Installation HighLevel introuvable.",
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    query = str(
+        request.query_params.get("q") or ""
+    ).strip()
+
+    try:
+        page = int(
+            request.query_params.get("page", 1)
+        )
+    except ValueError:
+        page = 1
+
+    page = max(page, 1)
+
+    try:
+        page_limit = int(
+            request.query_params.get(
+                "page_limit",
+                25,
+            )
+        )
+    except ValueError:
+        page_limit = 25
+
+    page_limit = max(
+        1,
+        min(page_limit, 100),
+    )
+
+    client = GHLClient(installation)
+
+    try:
+        result = client.search_contacts(
+            query=query,
+            page=page,
+            page_limit=page_limit,
+        )
+
+    except GHLAPIError as exc:
+        return Response(
+            {
+                "success": False,
+                "message": str(exc),
+                "details": exc.details,
+            },
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    raw_contacts = result.get(
+        "contacts",
+        [],
+    )
+
+    contacts = []
+
+    for contact in raw_contacts:
+        if not isinstance(contact, dict):
+            continue
+
+        first_name = (
+            contact.get("firstName")
+            or contact.get("firstNameLowerCase")
+            or ""
+        )
+
+        last_name = contact.get(
+            "lastName",
+            "",
+        )
+
+        contacts.append(
+            {
+                "id": contact.get("id"),
+                "first_name": first_name,
+                "last_name": last_name,
+                "name": (
+                    f"{first_name} {last_name}"
+                ).strip(),
+                "phone": (
+                    contact.get("phone")
+                    or ""
+                ),
+                "email": (
+                    contact.get("email")
+                    or ""
+                ),
+            }
+        )
+
+    return Response(
+        {
+            "success": True,
+            "contacts": contacts,
+            "pagination": {
+                "page": page,
+                "page_limit": page_limit,
+                "total": result.get(
+                    "total",
+                    len(contacts),
+                ),
+            },
+        }
     )

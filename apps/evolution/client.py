@@ -165,3 +165,180 @@ class EvolutionClient:
             )
 
         return result
+    
+
+    def set_webhook(
+        self,
+        *,
+        instance_name: str,
+        url: str,
+        events: list[str],
+    ) -> dict[str, Any]:
+        """
+        Configure le webhook d'une instance Evolution API 2.3.7.
+        """
+
+        safe_name = quote(
+            instance_name,
+            safe="",
+        )
+
+        payload = {
+            "webhook": {
+                "enabled": True,
+                "url": url,
+                "headers": {},
+                "byEvents": False,
+                "base64": False,
+                "events": events,
+            }
+        }
+
+        result = self._request(
+            "POST",
+            f"/webhook/set/{safe_name}",
+            json=payload,
+            expected_statuses=(200, 201),
+        )
+
+        if not isinstance(result, dict):
+            raise EvolutionAPIError(
+                "La réponse de configuration webhook est invalide."
+            )
+
+        return result
+
+
+    def find_webhook(
+        self,
+        instance_name: str,
+    ) -> dict[str, Any]:
+        """
+        Retourne la configuration webhook actuelle.
+        """
+
+        safe_name = quote(
+            instance_name,
+            safe="",
+        )
+
+        result = self._request(
+            "GET",
+            f"/webhook/find/{safe_name}",
+            expected_statuses=(200,),
+        )
+
+        if not isinstance(result, dict):
+            raise EvolutionAPIError(
+                "La configuration webhook retournée est invalide."
+            )
+
+        return result
+    
+    def check_whatsapp_numbers(
+        self,
+        *,
+        instance_name: str,
+        numbers: list[str],
+    ) -> list[dict[str, Any]]:
+        """
+        Vérifie quels numéros possèdent un compte WhatsApp.
+        """
+
+        safe_name = quote(
+            instance_name,
+            safe="",
+        )
+
+        clean_numbers = [
+            str(number).strip()
+            for number in numbers
+            if str(number).strip()
+        ]
+
+        if not clean_numbers:
+            return []
+
+        payload = {
+            "numbers": clean_numbers,
+        }
+
+        result = self._request(
+            "POST",
+            f"/chat/whatsappNumbers/{safe_name}",
+            json=payload,
+            expected_statuses=(200, 201),
+        )
+
+        # Evolution retourne généralement une liste.
+        if isinstance(result, list):
+            return result
+
+        # Compatibilité avec certaines variantes de réponse.
+        if isinstance(result, dict):
+
+            for key in (
+                "data",
+                "numbers",
+                "result",
+                "response",
+            ):
+                value = result.get(key)
+
+                if isinstance(value, list):
+                    return value
+
+        raise EvolutionAPIError(
+            "Evolution API a retourné un format "
+            "inattendu pour whatsappNumbers."
+        )
+
+    def send_text(
+        self,
+        *,
+        instance_name: str,
+        number: str,
+        text: str,
+        delay_ms: int = 1000,
+    ):
+        safe_name = quote(
+            instance_name,
+            safe="",
+        )
+
+        number = str(
+            number or ""
+        ).strip()
+
+        text = str(
+            text or ""
+        ).strip()
+
+        if not number:
+            raise EvolutionAPIError(
+                "Le numéro WhatsApp est obligatoire."
+            )
+
+        if not text:
+            raise EvolutionAPIError(
+                "Le message WhatsApp est vide."
+            )
+
+        payload = {
+            "number": number,
+            "text": text,
+            "delay": max(
+                0,
+                int(delay_ms),
+            ),
+        }
+
+        return self._request(
+            "POST",
+            f"/message/sendText/{safe_name}",
+            json=payload,
+            expected_statuses=(
+                200,
+                201,
+            ),
+        )

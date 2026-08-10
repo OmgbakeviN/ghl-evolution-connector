@@ -21,4 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/ghl/", include("apps.ghl.urls")),
     path("evolution/", include("apps.evolution.urls")),
+    path("api/evolution/", include("apps.evolution.webhooks_urls")),
+    path("api/messaging/", include("apps.messaging.urls")),
 ]

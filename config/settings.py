@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'apps.ghl.apps.GhlConfig',
     'apps.evolution.apps.EvolutionConfig',
+    'apps.messaging.apps.MessagingConfig',
 ]
 
 MIDDLEWARE = [
@@ -165,3 +166,19 @@ EVOLUTION_API_URL = os.getenv(
 EVOLUTION_API_KEY = os.getenv("EVOLUTION_API_KEY", "")
 
 EVOLUTION_INTEGRATION = os.getenv("EVOLUTION_INTEGRATION", "WHATSAPP-BAILEYS")
+
+APP_PUBLIC_URL = os.getenv("APP_PUBLIC_URL", "").rstrip("/")
+
+BULK_MESSAGE_INTERVAL_SECONDS = int(
+    os.getenv(
+        "BULK_MESSAGE_INTERVAL_SECONDS",
+        "5",
+    )
+)
+
+BULK_WORKER_IDLE_SECONDS = int(
+    os.getenv(
+        "BULK_WORKER_IDLE_SECONDS",
+        "2",
+    )
+)

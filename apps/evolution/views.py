@@ -1,4 +1,6 @@
 from typing import Any
+import hashlib
+import json
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
@@ -8,6 +10,11 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET, require_safe
 from django.views.decorators.clickjacking import xframe_options_exempt
 
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
 from apps.ghl.models import GHLInstallation
 from apps.ghl.embedded_tokens import (
     GHLEmbeddedTokenError,
@@ -16,7 +23,7 @@ from apps.ghl.embedded_tokens import (
 )
 
 from .client import EvolutionAPIError, EvolutionClient
-from .models import EvolutionInstance
+from .models import EvolutionInstance, WebhookEvent
 from .services import (
     normalize_instance_status,
     provision_evolution_instance,
@@ -442,3 +449,180 @@ def embedded_instance_status(request):
     )
 
     return response
+
+def normalize_evolution_event_type(
+    raw_event: object,
+) -> str:
+    """
+    Transforme par exemple :
+
+    messages.upsert
+    messages-upsert
+    MESSAGES_UPSERT
+
+    en :
+
+    MESSAGES_UPSERT
+    """
+
+    value = str(raw_event or "").strip()
+
+    return (
+        value
+        .replace(".", "_")
+        .replace("-", "_")
+        .upper()
+    )
+
+
+def extract_evolution_event_id(
+    payload: dict,
+) -> str:
+    """
+    Essaie d'extraire l'identifiant du message
+    sans dépendre d'une seule version Evolution.
+    """
+
+    data = payload.get("data")
+
+    if not isinstance(data, dict):
+        return ""
+
+    key = data.get("key")
+
+    if isinstance(key, dict):
+        event_id = key.get("id")
+
+        if event_id:
+            return str(event_id)
+
+    event_id = (
+        data.get("id")
+        or data.get("messageId")
+    )
+
+    return str(event_id or "")
+
+
+def build_webhook_deduplication_key(
+    *,
+    instance_id: int,
+    event_type: str,
+    event_id: str,
+    payload: dict,
+) -> str:
+
+    if event_id:
+        source = (
+            f"{instance_id}:"
+            f"{event_type}:"
+            f"{event_id}"
+        )
+    else:
+        canonical_payload = json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        )
+
+        source = (
+            f"{instance_id}:"
+            f"{event_type}:"
+            f"{canonical_payload}"
+        )
+
+    return hashlib.sha256(
+        source.encode("utf-8")
+    ).hexdigest()
+
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def evolution_webhook(
+    request,
+    webhook_secret: str,
+):
+    """
+    Endpoint appelé directement par Evolution API.
+    """
+
+    evolution_instance = (
+        EvolutionInstance.objects
+        .select_related("installation")
+        .filter(
+            webhook_secret=webhook_secret,
+            is_active=True,
+        )
+        .first()
+    )
+
+    if evolution_instance is None:
+        return Response(
+            {
+                "success": False,
+                "message": "Webhook inconnu.",
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    payload = request.data
+
+    if not isinstance(payload, dict):
+        return Response(
+            {
+                "success": False,
+                "message": (
+                    "Le payload webhook doit être "
+                    "un objet JSON."
+                ),
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    event_type = normalize_evolution_event_type(
+        payload.get("event")
+        or payload.get("type")
+    )
+
+    if not event_type:
+        event_type = "UNKNOWN"
+
+    event_id = extract_evolution_event_id(
+        payload
+    )
+
+    deduplication_key = (
+        build_webhook_deduplication_key(
+            instance_id=evolution_instance.pk,
+            event_type=event_type,
+            event_id=event_id,
+            payload=payload,
+        )
+    )
+
+    webhook_event, created = (
+        WebhookEvent.objects.get_or_create(
+            deduplication_key=deduplication_key,
+            defaults={
+                "instance": evolution_instance,
+                "event_type": event_type,
+                "event_id": event_id,
+                "payload": payload,
+                "status": (
+                    WebhookEvent.Status.RECEIVED
+                ),
+            },
+        )
+    )
+
+    return Response(
+        {
+            "success": True,
+            "received": True,
+            "duplicate": not created,
+            "event": event_type,
+        },
+        status=status.HTTP_200_OK,
+    )

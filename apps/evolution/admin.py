@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import EvolutionInstance
+from .models import EvolutionInstance, WebhookEvent
 
 
 @admin.register(EvolutionInstance)
@@ -41,3 +41,32 @@ class EvolutionInstanceAdmin(admin.ModelAdmin):
         "instance_api_key",
     )
 
+@admin.register(WebhookEvent)
+class WebhookEventAdmin(admin.ModelAdmin):
+    list_display = (
+        "event_type",
+        "instance",
+        "event_id",
+        "status",
+        "attempts",
+        "received_at",
+    )
+
+    list_filter = (
+        "event_type",
+        "status",
+        "received_at",
+    )
+
+    search_fields = (
+        "event_id",
+        "instance__instance_name",
+        "instance__installation__location_id",
+    )
+
+    readonly_fields = (
+        "payload",
+        "deduplication_key",
+        "received_at",
+        "processed_at",
+    )

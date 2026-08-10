@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     instance_status, whatsapp_dashboard, embedded_dashboard,
     embedded_instance_status, instance_status, whatsapp_dashboard, 
+    evolution_webhook,
 )
 
 

@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Evolution Messaging</title>
 
@@ -14,7 +12,6 @@
 </head>
 
 <body class="min-h-screen bg-slate-100 p-4 text-slate-900 sm:p-6">
-
     <main class="mx-auto max-w-6xl">
 
         <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -33,20 +30,10 @@
                 </p>
             </div>
 
-            <button
-                id="refresh-button"
-                type="button"
-                disabled
-                class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-                <svg
-                    id="refresh-icon"
-                    class="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
+            <button id="refresh-button" type="button" disabled
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
+                <svg id="refresh-icon" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
                     <path d="M20 6v6h-6"></path>
                     <path d="M4 18v-6h6"></path>
                     <path d="M18.5 9A7 7 0 0 0 6 5.5L4 8"></path>
@@ -60,268 +47,375 @@
 
         </header>
 
-        <div
-            id="error-container"
-            class="mb-6 hidden rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800"
-        >
+        <div class="mb-6 inline-flex rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+
+            <button id="connection-tab" type="button"
+                class="rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white">
+                Connexion WhatsApp
+            </button>
+
+            <button id="bulk-tab" type="button"
+                class="rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">
+                Bulk Messages
+            </button>
+
+        </div>
+
+        <div id="error-container" class="mb-6 hidden rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800">
             <p class="font-bold">
                 Une erreur est survenue
             </p>
 
-            <p
-                id="error-message"
-                class="mt-1 break-words text-sm"
-            ></p>
+            <p id="error-message" class="mt-1 break-words text-sm"></p>
         </div>
+        <div id="connection-panel">
+            <div id="bulk-panel" class="hidden">
+                <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
 
-        <div class="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+                    <div class="border-b border-slate-200 p-6 sm:p-8">
 
-            <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                        <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-slate-950">
+                                    Bulk Messages
+                                </h2>
 
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-950">
-                            État de la connexion
-                        </h2>
+                                <p class="mt-1 text-sm text-slate-500">
+                                    Sélectionnez les contacts HighLevel qui recevront votre campagne WhatsApp.
+                                </p>
+                            </div>
 
-                        <p class="mt-1 text-sm text-slate-500">
-                            Actualisation automatique toutes les 10 secondes.
+                            <div class="rounded-xl bg-emerald-50 px-4 py-3 text-sm">
+                                <span id="selected-count" class="font-bold text-emerald-700">
+                                    0
+                                </span>
+
+                                <span class="text-emerald-700">
+                                    contact(s) sélectionné(s)
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+
+                            <div class="relative flex-1">
+
+                                <svg class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.3-4.3"></path>
+                                </svg>
+
+                                <input id="contact-search" type="search" placeholder="Rechercher un contact..."
+                                    class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm outline-none transition focus:border-slate-400 focus:bg-white">
+
+                            </div>
+
+                            <button id="search-button" type="button"
+                                class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold transition hover:bg-slate-50">
+                                Rechercher
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="border-b border-slate-200 px-6 py-4 sm:px-8">
+
+                        <label class="flex cursor-pointer items-center gap-3">
+
+                            <input id="select-all" type="checkbox" class="h-4 w-4 rounded border-slate-300">
+
+                            <span class="text-sm font-semibold text-slate-700">
+                                Sélectionner les contacts visibles
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div id="contacts-loading" class="hidden py-16 text-center">
+                        <div
+                            class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900">
+                        </div>
+
+                        <p class="mt-4 text-sm text-slate-500">
+                            Chargement des contacts…
                         </p>
                     </div>
 
-                    <div
-                        id="status-badge"
-                        class="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700"
-                    >
-                        <span
-                            id="status-dot"
-                            class="h-2.5 w-2.5 rounded-full bg-slate-400"
-                        ></span>
 
-                        <span id="status-text">
-                            Initialisation…
-                        </span>
+                    <div id="contacts-empty" class="hidden px-6 py-16 text-center">
+                        <p class="font-semibold text-slate-700">
+                            Aucun contact trouvé.
+                        </p>
+
+                        <p class="mt-1 text-sm text-slate-500">
+                            Essayez une autre recherche.
+                        </p>
                     </div>
+
+
+                    <div id="contacts-list" class="divide-y divide-slate-100"></div>
+
+
+                    <div
+                        class="flex flex-col gap-4 border-t border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+
+                        <div class="text-sm text-slate-500">
+
+                            <span id="contacts-total">
+                                0 contact
+                            </span>
+
+                        </div>
+
+                        <div class="flex items-center gap-2">
+
+                            <button id="previous-page" type="button" disabled
+                                class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40">
+                                Précédent
+                            </button>
+
+                            <span id="page-number" class="px-3 text-sm font-medium text-slate-500">
+                                Page 1
+                            </span>
+
+                            <button id="next-page" type="button"
+                                class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40">
+                                Suivant
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+                <div class="mt-6 flex justify-end">
+
+                    <button id="continue-campaign" type="button" disabled
+                        class="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40">
+                        Continuer avec les contacts sélectionnés
+                    </button>
 
                 </div>
 
-                <div class="mt-8">
+            </div>
+            <div class="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
 
-                    <div
-                        id="loading-container"
-                        class="flex min-h-96 items-center justify-center rounded-3xl border border-slate-200 bg-slate-50"
-                    >
-                        <div class="text-center">
-                            <div class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900"></div>
+                <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
 
-                            <p
-                                id="loading-message"
-                                class="mt-4 text-sm font-medium text-slate-500"
-                            >
-                                Validation du contexte HighLevel…
-                            </p>
-                        </div>
-                    </div>
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                    <div
-                        id="connected-container"
-                        class="hidden min-h-96 items-center justify-center rounded-3xl border border-emerald-200 bg-emerald-50 p-8 text-center"
-                    >
                         <div>
-                            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white">
-                                <svg
-                                    class="h-8 w-8"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="3"
-                                >
-                                    <path d="m5 12 4 4L19 6"></path>
-                                </svg>
-                            </div>
+                            <h2 class="text-xl font-bold text-slate-950">
+                                État de la connexion
+                            </h2>
 
-                            <h3 class="mt-5 text-2xl font-bold text-emerald-950">
-                                WhatsApp est connecté
-                            </h3>
-
-                            <p
-                                id="connected-profile"
-                                class="mt-2 text-sm text-emerald-700"
-                            >
-                                Le numéro est associé à Evolution API.
+                            <p class="mt-1 text-sm text-slate-500">
+                                Actualisation automatique toutes les 10 secondes.
                             </p>
                         </div>
+
+                        <div id="status-badge"
+                            class="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700">
+                            <span id="status-dot" class="h-2.5 w-2.5 rounded-full bg-slate-400"></span>
+
+                            <span id="status-text">
+                                Initialisation…
+                            </span>
+                        </div>
+
                     </div>
 
-                    <div
-                        id="qr-container"
-                        class="hidden"
-                    >
-                        <div class="mx-auto max-w-sm rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                    <div class="mt-8">
 
-                            <div
-                                id="qr-loading"
-                                class="flex aspect-square items-center justify-center rounded-2xl bg-white"
-                            >
-                                <div class="text-center">
-                                    <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900"></div>
-
-                                    <p class="mt-4 text-sm text-slate-500">
-                                        Génération du QR Code…
-                                    </p>
+                        <div id="loading-container"
+                            class="flex min-h-96 items-center justify-center rounded-3xl border border-slate-200 bg-slate-50">
+                            <div class="text-center">
+                                <div
+                                    class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900">
                                 </div>
+
+                                <p id="loading-message" class="mt-4 text-sm font-medium text-slate-500">
+                                    Validation du contexte HighLevel…
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="connected-container"
+                            class="hidden min-h-96 items-center justify-center rounded-3xl border border-emerald-200 bg-emerald-50 p-8 text-center">
+                            <div>
+                                <div
+                                    class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white">
+                                    <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="3">
+                                        <path d="m5 12 4 4L19 6"></path>
+                                    </svg>
+                                </div>
+
+                                <h3 class="mt-5 text-2xl font-bold text-emerald-950">
+                                    WhatsApp est connecté
+                                </h3>
+
+                                <p id="connected-profile" class="mt-2 text-sm text-emerald-700">
+                                    Le numéro est associé à Evolution API.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="qr-container" class="hidden">
+                            <div class="mx-auto max-w-sm rounded-3xl border border-slate-200 bg-slate-50 p-5">
+
+                                <div id="qr-loading"
+                                    class="flex aspect-square items-center justify-center rounded-2xl bg-white">
+                                    <div class="text-center">
+                                        <div
+                                            class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900">
+                                        </div>
+
+                                        <p class="mt-4 text-sm text-slate-500">
+                                            Génération du QR Code…
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <img id="qr-image" src="" alt="QR Code de connexion WhatsApp"
+                                    class="hidden aspect-square w-full rounded-2xl bg-white object-contain">
+
                             </div>
 
-                            <img
-                                id="qr-image"
-                                src=""
-                                alt="QR Code de connexion WhatsApp"
-                                class="hidden aspect-square w-full rounded-2xl bg-white object-contain"
-                            >
+                            <div class="mx-auto mt-6 max-w-lg">
 
+                                <h3 class="text-center text-lg font-bold">
+                                    Scanner avec WhatsApp
+                                </h3>
+
+                                <ol class="mt-5 space-y-3 text-sm text-slate-600">
+
+                                    <li class="flex gap-3">
+                                        <span
+                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
+                                            1
+                                        </span>
+
+                                        Ouvrez WhatsApp sur votre téléphone.
+                                    </li>
+
+                                    <li class="flex gap-3">
+                                        <span
+                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
+                                            2
+                                        </span>
+
+                                        Ouvrez Appareils connectés.
+                                    </li>
+
+                                    <li class="flex gap-3">
+                                        <span
+                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
+                                            3
+                                        </span>
+
+                                        Sélectionnez Connecter un appareil et scannez ce QR Code.
+                                    </li>
+
+                                </ol>
+
+                                <p id="qr-count" class="mt-5 text-center text-xs text-slate-400"></p>
+
+                            </div>
                         </div>
 
-                        <div class="mx-auto mt-6 max-w-lg">
-
-                            <h3 class="text-center text-lg font-bold">
-                                Scanner avec WhatsApp
-                            </h3>
-
-                            <ol class="mt-5 space-y-3 text-sm text-slate-600">
-
-                                <li class="flex gap-3">
-                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
-                                        1
-                                    </span>
-
-                                    Ouvrez WhatsApp sur votre téléphone.
-                                </li>
-
-                                <li class="flex gap-3">
-                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
-                                        2
-                                    </span>
-
-                                    Ouvrez Appareils connectés.
-                                </li>
-
-                                <li class="flex gap-3">
-                                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
-                                        3
-                                    </span>
-
-                                    Sélectionnez Connecter un appareil et scannez ce QR Code.
-                                </li>
-
-                            </ol>
-
-                            <p
-                                id="qr-count"
-                                class="mt-5 text-center text-xs text-slate-400"
-                            ></p>
-
-                        </div>
                     </div>
-
-                </div>
-            </section>
-
-            <aside class="space-y-6">
-
-                <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-
-                    <h2 class="text-lg font-bold">
-                        Informations
-                    </h2>
-
-                    <dl class="mt-5 space-y-5">
-
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Sous-compte
-                            </dt>
-
-                            <dd
-                                id="location-id"
-                                class="mt-1 break-all text-sm font-medium"
-                            >
-                                —
-                            </dd>
-                        </div>
-
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Utilisateur
-                            </dt>
-
-                            <dd
-                                id="user-name"
-                                class="mt-1 text-sm font-medium"
-                            >
-                                —
-                            </dd>
-                        </div>
-
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Instance
-                            </dt>
-
-                            <dd
-                                id="instance-name"
-                                class="mt-1 break-all text-sm font-medium"
-                            >
-                                —
-                            </dd>
-                        </div>
-
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Intégration
-                            </dt>
-
-                            <dd
-                                id="integration"
-                                class="mt-1 text-sm font-medium"
-                            >
-                                —
-                            </dd>
-                        </div>
-
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Dernière vérification
-                            </dt>
-
-                            <dd
-                                id="last-synced"
-                                class="mt-1 text-sm font-medium"
-                            >
-                                —
-                            </dd>
-                        </div>
-
-                    </dl>
                 </section>
 
-                <section class="rounded-3xl border border-blue-200 bg-blue-50 p-6">
+                <aside class="space-y-6">
 
-                    <h2 class="font-bold text-blue-950">
-                        QR Code temporaire
-                    </h2>
+                    <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
 
-                    <p class="mt-2 text-sm leading-6 text-blue-800">
-                        Si le QR Code expire, un nouveau sera récupéré automatiquement auprès d’Evolution API.
-                    </p>
+                        <h2 class="text-lg font-bold">
+                            Informations
+                        </h2>
 
-                </section>
+                        <dl class="mt-5 space-y-5">
 
-            </aside>
+                            <div>
+                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                    Sous-compte
+                                </dt>
 
+                                <dd id="location-id" class="mt-1 break-all text-sm font-medium">
+                                    —
+                                </dd>
+                            </div>
+
+                            <div>
+                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                    Utilisateur
+                                </dt>
+
+                                <dd id="user-name" class="mt-1 text-sm font-medium">
+                                    —
+                                </dd>
+                            </div>
+
+                            <div>
+                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                    Instance
+                                </dt>
+
+                                <dd id="instance-name" class="mt-1 break-all text-sm font-medium">
+                                    —
+                                </dd>
+                            </div>
+
+                            <div>
+                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                    Intégration
+                                </dt>
+
+                                <dd id="integration" class="mt-1 text-sm font-medium">
+                                    —
+                                </dd>
+                            </div>
+
+                            <div>
+                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                    Dernière vérification
+                                </dt>
+
+                                <dd id="last-synced" class="mt-1 text-sm font-medium">
+                                    —
+                                </dd>
+                            </div>
+
+                        </dl>
+                    </section>
+
+                    <section class="rounded-3xl border border-blue-200 bg-blue-50 p-6">
+
+                        <h2 class="font-bold text-blue-950">
+                            QR Code temporaire
+                        </h2>
+
+                        <p class="mt-2 text-sm leading-6 text-blue-800">
+                            Si le QR Code expire, un nouveau sera récupéré automatiquement auprès d’Evolution API.
+                        </p>
+
+                    </section>
+
+                </aside>
+
+            </div>
         </div>
     </main>
-
     <script>
         const contextUrl = "{% url 'ghl:user-context' %}";
         const statusUrl = "{% url 'evolution:embedded-instance-status' %}";
@@ -392,7 +486,7 @@
             });
         }
 
-        
+
         function setLoading(isLoading, message = "") {
             refreshButton.disabled = isLoading || !embeddedToken;
 
@@ -462,7 +556,7 @@
                     if (
                         !data
                         || data.message
-                            !== "REQUEST_USER_DATA_RESPONSE"
+                        !== "REQUEST_USER_DATA_RESPONSE"
                     ) {
                         return;
                     }
@@ -686,8 +780,1131 @@
             10000
         );
 
+        const connectionTab = document.getElementById(
+            "connection-tab"
+        );
+
+        const bulkTab = document.getElementById(
+            "bulk-tab"
+        );
+
+        const connectionPanel = document.getElementById(
+            "connection-panel"
+        );
+
+        const bulkPanel = document.getElementById(
+            "bulk-panel"
+        );
+
+        let contactsLoaded = false;
+
+
+        function activateTab(tab) {
+
+            const activeClasses = [
+                "bg-slate-950",
+                "text-white",
+            ];
+
+            const inactiveClasses = [
+                "text-slate-600",
+            ];
+
+            connectionTab.classList.remove(
+                ...activeClasses,
+                ...inactiveClasses,
+            );
+
+            bulkTab.classList.remove(
+                ...activeClasses,
+                ...inactiveClasses,
+            );
+
+            if (tab === "bulk") {
+
+                connectionPanel.classList.add("hidden");
+                bulkPanel.classList.remove("hidden");
+
+                bulkTab.classList.add(
+                    ...activeClasses
+                );
+
+                connectionTab.classList.add(
+                    ...inactiveClasses
+                );
+
+                if (!contactsLoaded) {
+                    loadContacts();
+                }
+
+                return;
+            }
+
+            bulkPanel.classList.add("hidden");
+            connectionPanel.classList.remove("hidden");
+
+            connectionTab.classList.add(
+                ...activeClasses
+            );
+
+            bulkTab.classList.add(
+                ...inactiveClasses
+            );
+        }
+
+
+        connectionTab.addEventListener(
+            "click",
+            () => activateTab("connection")
+        );
+
+        bulkTab.addEventListener(
+            "click",
+            () => activateTab("bulk")
+        );
+
+        const selectedContacts = new Map();
+
+        let currentContacts = [];
+        let currentPage = 1;
+        let totalContacts = 0;
+        const pageLimit = 25;
+
+
+        const contactsList = document.getElementById(
+            "contacts-list"
+        );
+
+        const contactsLoading = document.getElementById(
+            "contacts-loading"
+        );
+
+        const contactsEmpty = document.getElementById(
+            "contacts-empty"
+        );
+
+        const selectedCount = document.getElementById(
+            "selected-count"
+        );
+
+        const selectAll = document.getElementById(
+            "select-all"
+        );
+
+        const continueCampaign = document.getElementById(
+            "continue-campaign"
+        );
+
+        const contactSearch = document.getElementById(
+            "contact-search"
+        );
+
+        const previousPage = document.getElementById(
+            "previous-page"
+        );
+
+        const nextPage = document.getElementById(
+            "next-page"
+        );
+
+
+        function updateSelectionState() {
+
+            selectedCount.textContent =
+                selectedContacts.size;
+
+            continueCampaign.disabled =
+                selectedContacts.size === 0;
+
+            const selectableContacts =
+                currentContacts.filter(
+                    contact => contact.phone
+                );
+
+            selectAll.checked =
+                selectableContacts.length > 0
+                && selectableContacts.every(
+                    contact =>
+                        selectedContacts.has(
+                            contact.id
+                        )
+                );
+        }
+
+        function renderContacts() {
+
+            contactsList.innerHTML = "";
+
+            contactsEmpty.classList.toggle(
+                "hidden",
+                currentContacts.length > 0
+            );
+
+            for (const contact of currentContacts) {
+
+                const row = document.createElement("label");
+
+                row.className =
+                    "flex items-center gap-4 px-6 py-4 transition hover:bg-slate-50 sm:px-8";
+
+
+                const checkbox = document.createElement(
+                    "input"
+                );
+
+                checkbox.type = "checkbox";
+
+                checkbox.className =
+                    "h-4 w-4 shrink-0 rounded border-slate-300";
+
+                checkbox.disabled = !contact.phone;
+
+                checkbox.checked =
+                    selectedContacts.has(
+                        contact.id
+                    );
+
+
+                const content = document.createElement(
+                    "div"
+                );
+
+                content.className =
+                    "min-w-0 flex-1";
+
+
+                const name = document.createElement(
+                    "p"
+                );
+
+                name.className =
+                    "truncate text-sm font-semibold text-slate-900";
+
+                name.textContent =
+                    contact.name
+                    || contact.email
+                    || contact.phone
+                    || "Contact sans nom";
+
+
+                const details = document.createElement(
+                    "p"
+                );
+
+                details.className =
+                    "mt-1 truncate text-xs text-slate-500";
+
+
+                if (contact.phone) {
+
+                    details.textContent = [
+                        contact.phone,
+                        contact.email,
+                    ]
+                        .filter(Boolean)
+                        .join(" • ");
+
+                } else {
+
+                    details.textContent =
+                        "Aucun numéro WhatsApp disponible";
+
+                    details.classList.add(
+                        "text-amber-600"
+                    );
+                }
+
+
+                content.appendChild(name);
+                content.appendChild(details);
+
+                row.appendChild(checkbox);
+                row.appendChild(content);
+
+
+                checkbox.addEventListener(
+                    "change",
+                    () => {
+
+                        if (checkbox.checked) {
+
+                            selectedContacts.set(
+                                contact.id,
+                                contact
+                            );
+
+                        } else {
+
+                            selectedContacts.delete(
+                                contact.id
+                            );
+                        }
+
+                        updateSelectionState();
+                    }
+                );
+
+
+                contactsList.appendChild(row);
+            }
+
+            updateSelectionState();
+        }
+        async function loadContacts(page = 1) {
+
+            if (!embeddedToken) {
+                return;
+            }
+
+            contactsLoading.classList.remove(
+                "hidden"
+            );
+
+            contactsList.classList.add(
+                "hidden"
+            );
+
+            contactsEmpty.classList.add(
+                "hidden"
+            );
+
+            const query =
+                contactSearch.value.trim();
+
+            const params = new URLSearchParams({
+                page: page.toString(),
+                page_limit: pageLimit.toString(),
+            });
+
+            if (query) {
+                params.set("q", query);
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    `${contactsUrl}?${params.toString()}`,
+                    {
+                        headers: {
+                            "Accept": "application/json",
+                            "Authorization":
+                                `Bearer ${embeddedToken}`,
+                        },
+                        cache: "no-store",
+                    }
+                );
+
+                const data = await response.json();
+
+
+                if (response.status === 401) {
+
+                    await authenticateEmbeddedPage();
+
+                    return await loadContacts(
+                        page
+                    );
+                }
+
+
+                if (!response.ok || !data.success) {
+
+                    throw new Error(
+                        data.message
+                        || "Impossible de récupérer les contacts."
+                    );
+                }
+
+
+                currentContacts =
+                    data.contacts || [];
+
+                currentPage =
+                    data.pagination?.page || 1;
+
+                totalContacts =
+                    data.pagination?.total || 0;
+
+                contactsLoaded = true;
+
+
+                document.getElementById(
+                    "contacts-total"
+                ).textContent =
+                    `${totalContacts} contact(s)`;
+
+
+                document.getElementById(
+                    "page-number"
+                ).textContent =
+                    `Page ${currentPage}`;
+
+
+                previousPage.disabled =
+                    currentPage <= 1;
+
+
+                nextPage.disabled =
+                    currentPage * pageLimit
+                    >= totalContacts;
+
+
+                renderContacts();
+
+            } catch (error) {
+
+                showError(
+                    error.message
+                    || "Erreur lors du chargement des contacts."
+                );
+
+            } finally {
+
+                contactsLoading.classList.add(
+                    "hidden"
+                );
+
+                contactsList.classList.remove(
+                    "hidden"
+                );
+            }
+        }
+        document.getElementById(
+            "search-button"
+        ).addEventListener(
+            "click",
+            () => loadContacts(1)
+        );
+
+
+        contactSearch.addEventListener(
+            "keydown",
+            event => {
+
+                if (event.key === "Enter") {
+                    loadContacts(1);
+                }
+            }
+        );
+
+
+        previousPage.addEventListener(
+            "click",
+            () => {
+
+                if (currentPage > 1) {
+                    loadContacts(
+                        currentPage - 1
+                    );
+                }
+            }
+        );
+
+
+        nextPage.addEventListener(
+            "click",
+            () => {
+
+                loadContacts(
+                    currentPage + 1
+                );
+            }
+        );
+        selectAll.addEventListener(
+            "change",
+            () => {
+
+                for (const contact of currentContacts) {
+
+                    if (!contact.phone) {
+                        continue;
+                    }
+
+                    if (selectAll.checked) {
+
+                        selectedContacts.set(
+                            contact.id,
+                            contact
+                        );
+
+                    } else {
+
+                        selectedContacts.delete(
+                            contact.id
+                        );
+                    }
+                }
+
+                renderContacts();
+            }
+        );
+        continueCampaign.addEventListener(
+            "click",
+            () => {
+
+                console.log(
+                    "Selected contacts:",
+                    Array.from(
+                        selectedContacts.values()
+                    )
+                );
+
+                alert(
+                    `${selectedContacts.size} contact(s) sélectionné(s).`
+                );
+            }
+        );
         initializePage();
     </script>
 
+
+<script>
+/* ================================================================
+   EVOLUTION MESSAGING - BULK CAMPAIGNS UI
+   Complète la Custom Page existante avec :
+   - composition de campagne
+   - vérification WhatsApp
+   - démarrage via le worker Django/PostgreSQL
+   - progression
+   - historique des campagnes
+   ================================================================ */
+
+// Le fichier d'origine appelle déjà loadContacts(). Cette propriété globale
+// lui fournit l'URL même si elle n'était pas encore déclarée dans son script.
+window.contactsUrl = "{% url 'ghl:embedded-contacts' %}";
+
+const EM_CREATE_CAMPAIGN_URL = "{% url 'messaging:create-campaign-draft' %}";
+const EM_CAMPAIGNS_LIST_URL = "/api/messaging/campaigns/";
+const emValidateUrl = id => `/api/messaging/campaigns/${id}/validate/`;
+const emStartUrl = id => `/api/messaging/campaigns/${id}/start/`;
+const emStatusUrl = id => `/api/messaging/campaigns/${id}/status/`;
+
+let emCurrentCampaignId = null;
+let emCampaignPollTimer = null;
+let emDetailCampaignId = null;
+let emDetailPollTimer = null;
+
+const emConnectionPanel = document.getElementById("connection-panel");
+const emBulkPanel = document.getElementById("bulk-panel");
+const emConnectionTab = document.getElementById("connection-tab");
+const emBulkTab = document.getElementById("bulk-tab");
+const emRefreshButton = document.getElementById("refresh-button");
+
+// Le premier fichier fourni avait bulk-panel à l'intérieur de connection-panel.
+// On le replace automatiquement comme panneau frère.
+if (emBulkPanel && emConnectionPanel && emBulkPanel.parentElement === emConnectionPanel) {
+    emConnectionPanel.parentElement.insertBefore(
+        emBulkPanel,
+        emConnectionPanel.nextSibling
+    );
+}
+
+// -----------------------------------------------------------------
+// Barre de succès
+// -----------------------------------------------------------------
+const emErrorContainer = document.getElementById("error-container");
+const emSuccessContainer = document.createElement("div");
+emSuccessContainer.id = "success-container";
+emSuccessContainer.className = "mb-6 hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800";
+emSuccessContainer.innerHTML = `
+    <div class="flex items-start justify-between gap-4">
+        <div>
+            <p class="font-bold">Opération réussie</p>
+            <p id="success-message" class="mt-1 text-sm"></p>
+        </div>
+        <button id="close-success" type="button" class="rounded-lg px-2 py-1 font-bold hover:bg-emerald-100">✕</button>
+    </div>`;
+emErrorContainer.insertAdjacentElement("afterend", emSuccessContainer);
+
+document.getElementById("close-success").addEventListener("click", () => {
+    emSuccessContainer.classList.add("hidden");
+});
+
+function emSuccess(message) {
+    document.getElementById("success-message").textContent = message;
+    emSuccessContainer.classList.remove("hidden");
+}
+
+function emHideSuccess() {
+    emSuccessContainer.classList.add("hidden");
+}
+
+function emFormatDate(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString("fr-FR");
+}
+
+function emStatusLabel(status) {
+    return ({
+        draft: "Brouillon",
+        queued: "En attente",
+        running: "En cours",
+        completed: "Terminée",
+        partial: "Partielle",
+        failed: "Échec",
+        cancelled: "Annulée",
+    })[status] || status || "—";
+}
+
+function emStatusClasses(status) {
+    return ({
+        draft: "bg-slate-100 text-slate-700",
+        queued: "bg-amber-100 text-amber-700",
+        running: "bg-blue-100 text-blue-700",
+        completed: "bg-emerald-100 text-emerald-700",
+        partial: "bg-orange-100 text-orange-700",
+        failed: "bg-red-100 text-red-700",
+        cancelled: "bg-slate-200 text-slate-600",
+    })[status] || "bg-slate-100 text-slate-700";
+}
+
+function emSetBadge(element, status) {
+    element.className = `inline-flex w-fit rounded-full px-3 py-1.5 text-sm font-bold ${emStatusClasses(status)}`;
+    element.textContent = emStatusLabel(status);
+}
+
+function emSetLoading(button, active, busyText, normalText) {
+    button.disabled = active;
+    button.textContent = active ? busyText : normalText;
+}
+
+async function emApi(url, options = {}, retry = true) {
+    const headers = {
+        Accept: "application/json",
+        ...(options.headers || {}),
+        Authorization: `Bearer ${embeddedToken}`,
+    };
+
+    let response = await fetch(url, {
+        ...options,
+        headers,
+        cache: "no-store",
+    });
+
+    if (response.status === 401 && retry) {
+        embeddedToken = "";
+        await authenticateEmbeddedPage();
+        response = await fetch(url, {
+            ...options,
+            headers: {
+                ...headers,
+                Authorization: `Bearer ${embeddedToken}`,
+            },
+            cache: "no-store",
+        });
+    }
+
+    let data = null;
+    try { data = await response.json(); } catch (_) {}
+
+    if (!response.ok || data?.success === false) {
+        const error = new Error(data?.message || `Erreur HTTP ${response.status}`);
+        error.status = response.status;
+        error.data = data;
+        throw error;
+    }
+
+    return data;
+}
+
+function emTrackingKey() {
+    const location = document.getElementById("location-id")?.textContent || "unknown";
+    return `evolution-messaging-campaigns:${location}`;
+}
+
+function emTrackedIds() {
+    try {
+        const value = JSON.parse(localStorage.getItem(emTrackingKey()) || "[]");
+        return Array.isArray(value) ? value.map(Number).filter(Number.isInteger) : [];
+    } catch (_) {
+        return [];
+    }
+}
+
+function emRememberCampaign(id) {
+    if (!id) return;
+    const ids = emTrackedIds().filter(value => value !== Number(id));
+    ids.unshift(Number(id));
+    localStorage.setItem(emTrackingKey(), JSON.stringify(ids.slice(0, 100)));
+}
+
+// -----------------------------------------------------------------
+// Ajouter un troisième onglet : Campagnes
+// -----------------------------------------------------------------
+const emCampaignsTab = document.createElement("button");
+emCampaignsTab.id = "campaigns-tab";
+emCampaignsTab.type = "button";
+emCampaignsTab.className = "rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100";
+emCampaignsTab.textContent = "Campagnes";
+emBulkTab.insertAdjacentElement("afterend", emCampaignsTab);
+
+const emCampaignsPanel = document.createElement("div");
+emCampaignsPanel.id = "campaigns-panel";
+emCampaignsPanel.className = "hidden space-y-6";
+emBulkPanel.insertAdjacentElement("afterend", emCampaignsPanel);
+
+function emSetTabVisual(active) {
+    [emConnectionTab, emBulkTab, emCampaignsTab].forEach(button => {
+        const selected = button === active;
+        button.classList.toggle("bg-slate-950", selected);
+        button.classList.toggle("text-white", selected);
+        button.classList.toggle("text-slate-600", !selected);
+    });
+}
+
+function emSetHeader(title, subtitle) {
+    const h1 = document.querySelector("header h1");
+    const p = h1?.parentElement?.querySelector("p.mt-2");
+    if (h1) h1.textContent = title;
+    if (p) p.textContent = subtitle;
+}
+
+emConnectionTab.addEventListener("click", () => {
+    emCampaignsPanel.classList.add("hidden");
+    emSetTabVisual(emConnectionTab);
+    emRefreshButton.classList.remove("hidden");
+    emSetHeader("Connexion WhatsApp", "Connectez le numéro WhatsApp de votre sous-compte HighLevel.");
+});
+
+emBulkTab.addEventListener("click", () => {
+    emCampaignsPanel.classList.add("hidden");
+    emSetTabVisual(emBulkTab);
+    emRefreshButton.classList.add("hidden");
+    emSetHeader("Bulk Messages", "Créez, vérifiez et envoyez vos campagnes WhatsApp depuis HighLevel.");
+});
+
+emCampaignsTab.addEventListener("click", () => {
+    emConnectionPanel.classList.add("hidden");
+    emBulkPanel.classList.add("hidden");
+    emCampaignsPanel.classList.remove("hidden");
+    emSetTabVisual(emCampaignsTab);
+    emRefreshButton.classList.add("hidden");
+    emSetHeader("Campagnes", "Suivez l'historique et la progression de vos campagnes WhatsApp.");
+    emLoadCampaigns();
+});
+
+// -----------------------------------------------------------------
+// UI composition / validation / progression
+// -----------------------------------------------------------------
+emBulkPanel.insertAdjacentHTML("beforeend", `
+    <section id="campaign-compose" class="mt-6 hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Étape 2</p>
+                <h2 class="mt-1 text-2xl font-bold">Préparer la campagne</h2>
+                <p class="mt-1 text-sm text-slate-500">Composez le message qui sera personnalisé pour chaque destinataire.</p>
+            </div>
+            <button id="back-to-contacts" type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold hover:bg-slate-50">Retour aux contacts</button>
+        </div>
+
+        <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_0.35fr]">
+            <div class="space-y-6">
+                <div>
+                    <label class="text-sm font-semibold">Nom de la campagne</label>
+                    <input id="campaign-name" maxlength="255" placeholder="Ex : Promotion août" class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-slate-400">
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm font-semibold">Message WhatsApp</label>
+                        <span id="campaign-message-count" class="text-xs text-slate-400">0 / 4000</span>
+                    </div>
+                    <textarea id="campaign-message" rows="8" maxlength="4000" placeholder="Bonjour {{firstName}}, nous avons une nouvelle offre..." class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-slate-400"></textarea>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        <button type="button" data-var="{{firstName}}" class="em-var rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold">+ Prénom</button>
+                        <button type="button" data-var="{{lastName}}" class="em-var rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold">+ Nom</button>
+                        <button type="button" data-var="{{email}}" class="em-var rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold">+ Email</button>
+                        <button type="button" data-var="{{phone}}" class="em-var rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold">+ Téléphone</button>
+                    </div>
+                </div>
+
+                <label class="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                    <input id="campaign-consent" type="checkbox" class="mt-1 h-4 w-4">
+                    <span class="text-sm leading-6 text-amber-900">Je confirme que ces contacts sont autorisés à recevoir cette communication WhatsApp.</span>
+                </label>
+            </div>
+
+            <aside class="rounded-2xl bg-slate-50 p-5">
+                <p class="text-xs font-bold uppercase text-slate-400">Destinataires</p>
+                <p id="compose-recipient-count" class="mt-3 text-4xl font-bold">0</p>
+                <p class="mt-1 text-sm text-slate-500">contact(s) sélectionné(s)</p>
+                <p class="mt-5 border-t border-slate-200 pt-5 text-xs leading-5 text-slate-500">Après la création, Evolution API vérifiera quels numéros existent réellement sur WhatsApp.</p>
+            </aside>
+        </div>
+
+        <div class="mt-6 flex justify-end">
+            <button id="create-campaign" type="button" class="rounded-xl bg-slate-950 px-6 py-3 text-sm font-bold text-white disabled:opacity-50">Créer le brouillon</button>
+        </div>
+    </section>
+
+    <section id="campaign-validation" class="mt-6 hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Étape 3</p>
+                <h2 class="mt-1 text-2xl font-bold">Vérification WhatsApp</h2>
+                <p class="mt-1 text-sm text-slate-500">Les numéros non WhatsApp seront exclus automatiquement.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button id="validate-campaign" type="button" class="rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-40">Vérifier les numéros</button>
+                <button id="start-campaign" type="button" disabled class="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-40">Démarrer la campagne</button>
+            </div>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-2 rounded-2xl bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p id="current-campaign-name" class="font-bold">—</p>
+                <p class="mt-1 text-xs text-slate-500">Campagne #<span id="current-campaign-id">—</span></p>
+            </div>
+            <span id="current-campaign-status" class="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold">Brouillon</span>
+        </div>
+
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="rounded-2xl border border-slate-200 p-5"><p class="text-xs font-bold uppercase text-slate-400">Total</p><p id="validation-total" class="mt-2 text-3xl font-bold">0</p></div>
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5"><p class="text-xs font-bold uppercase text-emerald-600">WhatsApp valides</p><p id="validation-valid" class="mt-2 text-3xl font-bold text-emerald-700">0</p></div>
+            <div class="rounded-2xl border border-red-200 bg-red-50 p-5"><p class="text-xs font-bold uppercase text-red-500">Non WhatsApp</p><p id="validation-invalid" class="mt-2 text-3xl font-bold text-red-700">0</p></div>
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5"><p class="text-xs font-bold uppercase text-amber-600">Erreurs</p><p id="validation-errors" class="mt-2 text-3xl font-bold text-amber-700">0</p></div>
+        </div>
+
+        <div id="validation-loading" class="mt-6 hidden rounded-2xl bg-blue-50 p-4 text-sm font-semibold text-blue-800">Vérification des numéros en cours…</div>
+    </section>
+
+    <section id="campaign-progress" class="mt-6 hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div><p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Étape 4</p><h2 class="mt-1 text-2xl font-bold">Envoi de la campagne</h2></div>
+            <span id="progress-status" class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold">—</span>
+        </div>
+
+        <div class="mt-7 flex justify-between text-sm"><span class="font-semibold">Progression</span><span id="progress-label" class="text-slate-500">0 / 0</span></div>
+        <div class="mt-3 h-3 overflow-hidden rounded-full bg-slate-100"><div id="progress-bar" class="h-full rounded-full bg-emerald-500 transition-all" style="width:0%"></div></div>
+
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-400">Prêts</p><p id="progress-ready" class="mt-1 text-2xl font-bold">0</p></div>
+            <div class="rounded-2xl bg-blue-50 p-4"><p class="text-xs text-blue-500">En cours</p><p id="progress-processing" class="mt-1 text-2xl font-bold text-blue-700">0</p></div>
+            <div class="rounded-2xl bg-emerald-50 p-4"><p class="text-xs text-emerald-500">Envoyés</p><p id="progress-sent" class="mt-1 text-2xl font-bold text-emerald-700">0</p></div>
+            <div class="rounded-2xl bg-red-50 p-4"><p class="text-xs text-red-500">Échecs</p><p id="progress-failed" class="mt-1 text-2xl font-bold text-red-700">0</p></div>
+            <div class="rounded-2xl bg-amber-50 p-4"><p class="text-xs text-amber-600">Non WhatsApp</p><p id="progress-not-whatsapp" class="mt-1 text-2xl font-bold text-amber-700">0</p></div>
+        </div>
+
+        <div class="mt-6 flex flex-wrap justify-end gap-3">
+            <button id="view-current-campaign" type="button" class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold">Voir dans Campagnes</button>
+            <button id="new-campaign" type="button" class="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Nouvelle campagne</button>
+        </div>
+    </section>
+`);
+
+// -----------------------------------------------------------------
+// Historique des campagnes
+// -----------------------------------------------------------------
+emCampaignsPanel.innerHTML = `
+    <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div class="flex flex-col gap-4 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+            <div><h2 class="text-2xl font-bold">Historique des campagnes</h2><p class="mt-1 text-sm text-slate-500">Consultez les campagnes du sous-compte et leur état d'envoi.</p></div>
+            <button id="refresh-campaigns" type="button" class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold">Actualiser</button>
+        </div>
+        <div id="campaigns-loading" class="hidden py-16 text-center"><div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900"></div><p class="mt-4 text-sm text-slate-500">Chargement…</p></div>
+        <div id="campaigns-empty" class="hidden px-6 py-16 text-center"><p class="font-semibold">Aucune campagne trouvée.</p><p class="mt-1 text-sm text-slate-500">Créez une campagne depuis Bulk Messages.</p></div>
+        <div id="campaigns-list" class="divide-y divide-slate-100"></div>
+    </section>
+
+    <section id="campaign-detail" class="hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div><p class="text-xs font-bold uppercase text-emerald-600">Détails</p><h2 id="detail-name" class="mt-1 text-2xl font-bold">—</h2><p class="mt-1 text-sm text-slate-500">Campagne #<span id="detail-id">—</span></p></div>
+            <div class="flex flex-wrap gap-2"><button id="detail-validate" type="button" class="hidden rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white">Vérifier WhatsApp</button><button id="detail-start" type="button" class="hidden rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white">Démarrer</button><button id="detail-refresh" type="button" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold">Actualiser</button></div>
+        </div>
+        <div class="mt-5"><span id="detail-status" class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold">—</span></div>
+        <div class="mt-6 h-3 overflow-hidden rounded-full bg-slate-100"><div id="detail-progress-bar" class="h-full rounded-full bg-emerald-500" style="width:0%"></div></div><p id="detail-progress-label" class="mt-2 text-right text-xs text-slate-500">0 / 0</p>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+            <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-400">En attente</p><p id="detail-pending" class="mt-1 text-2xl font-bold">0</p></div>
+            <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-400">Prêts</p><p id="detail-ready" class="mt-1 text-2xl font-bold">0</p></div>
+            <div class="rounded-2xl bg-blue-50 p-4"><p class="text-xs text-blue-500">En cours</p><p id="detail-processing" class="mt-1 text-2xl font-bold text-blue-700">0</p></div>
+            <div class="rounded-2xl bg-emerald-50 p-4"><p class="text-xs text-emerald-500">Envoyés</p><p id="detail-sent" class="mt-1 text-2xl font-bold text-emerald-700">0</p></div>
+            <div class="rounded-2xl bg-red-50 p-4"><p class="text-xs text-red-500">Échecs</p><p id="detail-failed" class="mt-1 text-2xl font-bold text-red-700">0</p></div>
+            <div class="rounded-2xl bg-amber-50 p-4"><p class="text-xs text-amber-600">Non WhatsApp</p><p id="detail-not-whatsapp" class="mt-1 text-2xl font-bold text-amber-700">0</p></div>
+        </div>
+        <div class="mt-6 grid gap-4 sm:grid-cols-3"><div class="rounded-2xl border border-slate-200 p-4"><p class="text-xs uppercase text-slate-400">Total</p><p id="detail-total" class="mt-1 font-medium">0</p></div><div class="rounded-2xl border border-slate-200 p-4"><p class="text-xs uppercase text-slate-400">Début</p><p id="detail-started" class="mt-1 font-medium">—</p></div><div class="rounded-2xl border border-slate-200 p-4"><p class="text-xs uppercase text-slate-400">Fin</p><p id="detail-completed" class="mt-1 font-medium">—</p></div></div>
+    </section>`;
+
+// -----------------------------------------------------------------
+// Intercepter l'ancien bouton Continue pour éviter l'ancien alert()
+// -----------------------------------------------------------------
+document.addEventListener("click", event => {
+    if (event.target.closest("#continue-campaign")) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (!selectedContacts.size) return;
+        document.getElementById("compose-recipient-count").textContent = selectedContacts.size;
+        document.getElementById("campaign-compose").classList.remove("hidden");
+        document.getElementById("campaign-compose").scrollIntoView({behavior:"smooth", block:"start"});
+    }
+}, true);
+
+document.getElementById("back-to-contacts").addEventListener("click", () => {
+    emBulkPanel.scrollIntoView({behavior:"smooth", block:"start"});
+});
+
+const emCampaignMessage = document.getElementById("campaign-message");
+emCampaignMessage.addEventListener("input", () => {
+    document.getElementById("campaign-message-count").textContent = `${emCampaignMessage.value.length} / 4000`;
+});
+
+document.querySelectorAll(".em-var").forEach(button => {
+    button.addEventListener("click", () => {
+        const variable = button.dataset.var || "";
+        const start = emCampaignMessage.selectionStart;
+        const end = emCampaignMessage.selectionEnd;
+        emCampaignMessage.value = emCampaignMessage.value.slice(0,start) + variable + emCampaignMessage.value.slice(end);
+        const cursor = start + variable.length;
+        emCampaignMessage.focus();
+        emCampaignMessage.setSelectionRange(cursor,cursor);
+        emCampaignMessage.dispatchEvent(new Event("input"));
+    });
+});
+
+// -----------------------------------------------------------------
+// Créer le brouillon
+// -----------------------------------------------------------------
+const emCreateButton = document.getElementById("create-campaign");
+emCreateButton.addEventListener("click", async () => {
+    hideError(); emHideSuccess();
+    const name = document.getElementById("campaign-name").value.trim();
+    const message = emCampaignMessage.value.trim();
+    const consent = document.getElementById("campaign-consent").checked;
+    const ids = Array.from(selectedContacts.keys());
+
+    if (!name) return showError("Donnez un nom à la campagne.");
+    if (!message) return showError("Écrivez le message WhatsApp.");
+    if (!consent) return showError("Confirmez que les contacts sont autorisés à recevoir cette communication.");
+    if (!ids.length) return showError("Sélectionnez au moins un contact.");
+
+    emSetLoading(emCreateButton,true,"Création…","Créer le brouillon");
+    try {
+        const data = await emApi(EM_CREATE_CAMPAIGN_URL, {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({name, message, contact_ids:ids, confirmed_opt_in:consent}),
+        });
+        emCurrentCampaignId = data.campaign.id;
+        emRememberCampaign(emCurrentCampaignId);
+        emPrepareValidation(data.campaign);
+        emSuccess(`Brouillon « ${data.campaign.name} » créé avec ${data.campaign.total_contacts} destinataire(s).`);
+    } catch(error) {
+        showError(error.message);
+    } finally {
+        emSetLoading(emCreateButton,false,"Création…","Créer le brouillon");
+    }
+});
+
+function emPrepareValidation(campaign) {
+    document.getElementById("current-campaign-id").textContent = campaign.id;
+    document.getElementById("current-campaign-name").textContent = campaign.name || `Campagne #${campaign.id}`;
+    emSetBadge(document.getElementById("current-campaign-status"), campaign.status || "draft");
+    document.getElementById("validation-total").textContent = campaign.total_contacts || 0;
+    document.getElementById("validation-valid").textContent = 0;
+    document.getElementById("validation-invalid").textContent = campaign.skipped_count || 0;
+    document.getElementById("validation-errors").textContent = 0;
+    document.getElementById("start-campaign").disabled = true;
+    document.getElementById("validate-campaign").disabled = false;
+    document.getElementById("campaign-validation").classList.remove("hidden");
+    document.getElementById("campaign-validation").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+// -----------------------------------------------------------------
+// Vérifier WhatsApp
+// -----------------------------------------------------------------
+async function emValidateCampaign(id, button, normalText="Vérifier les numéros") {
+    hideError(); emHideSuccess();
+    if (!id) return null;
+    const loading = document.getElementById("validation-loading");
+    loading.classList.remove("hidden");
+    emSetLoading(button,true,"Vérification…",normalText);
+    try {
+        const data = await emApi(emValidateUrl(id), {method:"POST"});
+        const v = data.validation || {};
+        document.getElementById("validation-total").textContent = v.total || 0;
+        document.getElementById("validation-valid").textContent = v.valid || 0;
+        document.getElementById("validation-invalid").textContent = v.invalid || 0;
+        document.getElementById("validation-errors").textContent = v.errors || 0;
+        document.getElementById("start-campaign").disabled = Number(v.valid || 0) <= 0;
+        emRememberCampaign(id);
+        emSuccess(`Vérification terminée : ${v.valid || 0} valide(s), ${v.invalid || 0} non WhatsApp, ${v.errors || 0} erreur(s).`);
+        return v;
+    } catch(error) {
+        showError(error.message);
+        return null;
+    } finally {
+        loading.classList.add("hidden");
+        emSetLoading(button,false,"Vérification…",normalText);
+    }
+}
+
+document.getElementById("validate-campaign").addEventListener("click", async () => {
+    const v = await emValidateCampaign(emCurrentCampaignId, document.getElementById("validate-campaign"));
+    if (v) {
+        const data = await emGetStatus(emCurrentCampaignId, false).catch(()=>null);
+        if (data) emRenderCurrent(data);
+    }
+});
+
+// -----------------------------------------------------------------
+// Démarrer
+// -----------------------------------------------------------------
+async function emStartCampaign(id, button, normalText="Démarrer la campagne") {
+    hideError(); emHideSuccess();
+    if (!id) return null;
+    emSetLoading(button,true,"Démarrage…",normalText);
+    try {
+        const data = await emApi(emStartUrl(id), {method:"POST"});
+        emCurrentCampaignId = id;
+        emRememberCampaign(id);
+        document.getElementById("campaign-progress").classList.remove("hidden");
+        emSuccess(`${data.message || "Campagne en file d'envoi."} Le worker Django va traiter les messages.`);
+        emStartPolling(id);
+        return data;
+    } catch(error) {
+        showError(error.message);
+        return null;
+    } finally {
+        emSetLoading(button,false,"Démarrage…",normalText);
+    }
+}
+
+document.getElementById("start-campaign").addEventListener("click", () => {
+    emStartCampaign(emCurrentCampaignId, document.getElementById("start-campaign"));
+});
+
+async function emGetStatus(id, displayError=true) {
+    try {
+        const data = await emApi(emStatusUrl(id), {method:"GET"});
+        emRememberCampaign(id);
+        return data;
+    } catch(error) {
+        if (displayError) showError(error.message);
+        throw error;
+    }
+}
+
+function emProgress(data) {
+    const c = data.campaign || {}, r = data.recipients || {};
+    const total = Number(c.total_contacts || 0);
+    const done = Number(r.sent||0)+Number(r.failed||0)+Number(r.not_on_whatsapp||0)+Number(r.skipped||0);
+    return {total, done, percent: total ? Math.min(100,Math.round(done*100/total)) : 0};
+}
+
+function emRenderCurrent(data) {
+    const c=data.campaign||{}, r=data.recipients||{}, p=emProgress(data);
+    emCurrentCampaignId=c.id;
+    document.getElementById("current-campaign-id").textContent=c.id||"—";
+    document.getElementById("current-campaign-name").textContent=c.name||"Campagne";
+    emSetBadge(document.getElementById("current-campaign-status"),c.status);
+    document.getElementById("validation-total").textContent=c.total_contacts||0;
+    document.getElementById("validation-valid").textContent=r.ready||0;
+    document.getElementById("validation-invalid").textContent=r.not_on_whatsapp||0;
+    document.getElementById("validation-errors").textContent=r.failed||0;
+    document.getElementById("start-campaign").disabled = c.status!=="draft" || Number(r.ready||0)<=0;
+    document.getElementById("validate-campaign").disabled = c.status!=="draft";
+
+    emSetBadge(document.getElementById("progress-status"),c.status);
+    document.getElementById("progress-ready").textContent=r.ready||0;
+    document.getElementById("progress-processing").textContent=r.processing||0;
+    document.getElementById("progress-sent").textContent=r.sent||0;
+    document.getElementById("progress-failed").textContent=r.failed||0;
+    document.getElementById("progress-not-whatsapp").textContent=r.not_on_whatsapp||0;
+    document.getElementById("progress-label").textContent=`${p.done} / ${p.total}`;
+    document.getElementById("progress-bar").style.width=`${p.percent}%`;
+    if (["queued","running","completed","partial","failed","cancelled"].includes(c.status)) document.getElementById("campaign-progress").classList.remove("hidden");
+}
+
+function emStopPolling(){ if(emCampaignPollTimer){clearInterval(emCampaignPollTimer);emCampaignPollTimer=null;} }
+async function emPoll(id){
+    const data=await emGetStatus(id,false).catch(()=>null); if(!data)return;
+    emRenderCurrent(data);
+    if(["completed","partial","failed","cancelled"].includes(data.campaign?.status)){emStopPolling();emLoadCampaigns(false);}
+}
+function emStartPolling(id){emStopPolling();emPoll(id);emCampaignPollTimer=setInterval(()=>emPoll(id),2500);}
+
+// -----------------------------------------------------------------
+// Nouvelle campagne
+// -----------------------------------------------------------------
+document.getElementById("new-campaign").addEventListener("click", () => {
+    emStopPolling(); emCurrentCampaignId=null; selectedContacts.clear();
+    document.getElementById("campaign-name").value="";
+    emCampaignMessage.value="";
+    document.getElementById("campaign-message-count").textContent="0 / 4000";
+    document.getElementById("campaign-consent").checked=false;
+    document.getElementById("campaign-compose").classList.add("hidden");
+    document.getElementById("campaign-validation").classList.add("hidden");
+    document.getElementById("campaign-progress").classList.add("hidden");
+    updateSelectionState(); renderContacts();
+    emBulkPanel.scrollIntoView({behavior:"smooth",block:"start"});
+});
+
+document.getElementById("view-current-campaign").addEventListener("click", async () => {
+    if(!emCurrentCampaignId)return;
+    emCampaignsTab.click();
+    await emOpenDetail(emCurrentCampaignId);
+});
+
+// -----------------------------------------------------------------
+// Liste des campagnes
+// GET /api/messaging/campaigns/ si présent.
+// Sinon fallback localStorage + GET status pour les campagnes créées ici.
+// -----------------------------------------------------------------
+async function emFallbackCampaigns(){
+    const results=await Promise.allSettled(emTrackedIds().map(async id=>(await emGetStatus(id,false)).campaign));
+    return results.filter(r=>r.status==="fulfilled").map(r=>r.value).filter(Boolean);
+}
+
+async function emLoadCampaigns(displayError=true){
+    const loading=document.getElementById("campaigns-loading"), list=document.getElementById("campaigns-list"), empty=document.getElementById("campaigns-empty");
+    loading.classList.remove("hidden"); list.classList.add("hidden"); empty.classList.add("hidden");
+    let campaigns=[];
+    try {
+        const data=await emApi(EM_CAMPAIGNS_LIST_URL,{method:"GET"});
+        campaigns=data.campaigns||[]; campaigns.forEach(c=>emRememberCampaign(c.id));
+    } catch(error) {
+        if(error.status===404) campaigns=await emFallbackCampaigns();
+        else if(displayError) showError(error.message);
+    }
+    list.innerHTML=""; empty.classList.toggle("hidden",campaigns.length>0);
+    campaigns.forEach(c=>{
+        const row=document.createElement("div"); row.className="flex flex-col gap-4 px-6 py-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between";
+        const left=document.createElement("div"); left.className="min-w-0";
+        const head=document.createElement("div"); head.className="flex flex-wrap items-center gap-3";
+        const name=document.createElement("p"); name.className="font-bold"; name.textContent=c.name||`Campagne #${c.id}`;
+        const badge=document.createElement("span"); emSetBadge(badge,c.status); head.append(name,badge);
+        const meta=document.createElement("p"); meta.className="mt-2 text-xs text-slate-500";
+        meta.textContent=[`#${c.id}`,`${c.total_contacts||0} contact(s)`,`${c.sent_count||0} envoyé(s)`,`${c.failed_count||0} échec(s)`,`${c.not_on_whatsapp_count||0} non WhatsApp`, c.created_at?`Créée le ${emFormatDate(c.created_at)}`:null].filter(Boolean).join(" • ");
+        left.append(head,meta);
+        const btn=document.createElement("button"); btn.type="button"; btn.className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold"; btn.textContent="Ouvrir"; btn.addEventListener("click",()=>emOpenDetail(c.id));
+        row.append(left,btn); list.appendChild(row);
+    });
+    loading.classList.add("hidden"); list.classList.remove("hidden");
+}
+
+document.getElementById("refresh-campaigns").addEventListener("click",()=>emLoadCampaigns());
+
+// -----------------------------------------------------------------
+// Détail campagne
+// -----------------------------------------------------------------
+function emStopDetailPoll(){if(emDetailPollTimer){clearInterval(emDetailPollTimer);emDetailPollTimer=null;}}
+function emRenderDetail(data){
+    const c=data.campaign||{},r=data.recipients||{},p=emProgress(data); emDetailCampaignId=c.id;
+    document.getElementById("detail-name").textContent=c.name||"Campagne"; document.getElementById("detail-id").textContent=c.id||"—"; emSetBadge(document.getElementById("detail-status"),c.status);
+    for(const [id,key] of [["detail-pending","pending"],["detail-ready","ready"],["detail-processing","processing"],["detail-sent","sent"],["detail-failed","failed"],["detail-not-whatsapp","not_on_whatsapp"]]) document.getElementById(id).textContent=r[key]||0;
+    document.getElementById("detail-total").textContent=`${c.total_contacts||0} contact(s)`; document.getElementById("detail-started").textContent=emFormatDate(c.started_at); document.getElementById("detail-completed").textContent=emFormatDate(c.completed_at); document.getElementById("detail-progress-bar").style.width=`${p.percent}%`; document.getElementById("detail-progress-label").textContent=`${p.done} / ${p.total}`;
+    const draft=c.status==="draft"; document.getElementById("detail-validate").classList.toggle("hidden",!draft || Number(r.pending||0)+Number(r.failed||0)<=0); document.getElementById("detail-start").classList.toggle("hidden",!draft || Number(r.ready||0)<=0);
+    document.getElementById("campaign-detail").classList.remove("hidden"); emStopDetailPoll(); if(["queued","running"].includes(c.status)) emDetailPollTimer=setInterval(()=>emRefreshDetail(false),2500);
+}
+async function emOpenDetail(id){const data=await emGetStatus(id).catch(()=>null);if(!data)return;emRenderDetail(data);document.getElementById("campaign-detail").scrollIntoView({behavior:"smooth",block:"start"});}
+async function emRefreshDetail(show=true){if(!emDetailCampaignId)return;const data=await emGetStatus(emDetailCampaignId,show).catch(()=>null);if(data)emRenderDetail(data);}
+document.getElementById("detail-refresh").addEventListener("click",()=>emRefreshDetail());
+document.getElementById("detail-validate").addEventListener("click",async()=>{const b=document.getElementById("detail-validate");const v=await emValidateCampaign(emDetailCampaignId,b,"Vérifier WhatsApp");if(v){await emRefreshDetail();await emLoadCampaigns(false);}});
+document.getElementById("detail-start").addEventListener("click",async()=>{const b=document.getElementById("detail-start");const d=await emStartCampaign(emDetailCampaignId,b,"Démarrer");if(d){await emRefreshDetail();await emLoadCampaigns(false);}});
+
+</script>
+
 </body>
+
 </html>

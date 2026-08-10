@@ -166,3 +166,87 @@ def provision_evolution_instance(
     )
 
     return evolution_instance, True
+
+
+WEBHOOK_EVENTS = [
+    "MESSAGES_UPSERT",
+    "CONNECTION_UPDATE",
+]
+
+WEBHOOK_CONFIG_VERSION = 1
+
+def configure_instance_webhook(
+    evolution_instance: EvolutionInstance,
+    *,
+    force: bool = False,
+) -> bool:
+    """
+    Configure le webhook Evolution de l'instance.
+
+    Retourne True si une configuration distante
+    a été effectuée.
+    """
+
+    if not settings.APP_PUBLIC_URL:
+        raise EvolutionAPIError(
+            "APP_PUBLIC_URL n'est pas configuré."
+        )
+
+    if not evolution_instance.webhook_secret:
+        evolution_instance.webhook_secret = (
+            secrets.token_urlsafe(32)
+        )
+
+        evolution_instance.save(
+            update_fields=[
+                "webhook_secret",
+                "updated_at",
+            ]
+        )
+
+    webhook_url = (
+        f"{settings.APP_PUBLIC_URL}"
+        f"/api/evolution/webhooks/"
+        f"{evolution_instance.webhook_secret}/"
+    )
+
+    metadata = evolution_instance.metadata or {}
+
+    current_version = metadata.get(
+        "webhook_config_version"
+    )
+
+    if (
+        not force
+        and evolution_instance.webhook_url == webhook_url
+        and current_version == WEBHOOK_CONFIG_VERSION
+    ):
+        return False
+
+    client = EvolutionClient()
+
+    client.set_webhook(
+        instance_name=evolution_instance.instance_name,
+        url=webhook_url,
+        events=WEBHOOK_EVENTS,
+    )
+
+    evolution_instance.webhook_url = webhook_url
+
+    metadata["webhook_config_version"] = (
+        WEBHOOK_CONFIG_VERSION
+    )
+
+    metadata["webhook_events"] = WEBHOOK_EVENTS
+
+    evolution_instance.metadata = metadata
+
+    evolution_instance.save(
+        update_fields=[
+            "webhook_url",
+            "metadata",
+            "updated_at",
+        ]
+    )
+
+    return True

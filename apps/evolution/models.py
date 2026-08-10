@@ -60,6 +60,13 @@ class EvolutionInstance(models.Model):
         blank=True,
     )
 
+    webhook_secret = models.CharField(
+    max_length=128,
+    unique=True,
+    null=True,
+    blank=True,
+    )
+
     is_active = models.BooleanField(
         default=True,
     )
@@ -95,3 +102,67 @@ class EvolutionInstance(models.Model):
 
     def __str__(self) -> str:
         return f"{self.instance_name} — {self.status}"
+    
+class WebhookEvent(models.Model):
+
+    class Status(models.TextChoices):
+        RECEIVED = "received", "Reçu"
+        PROCESSING = "processing", "En traitement"
+        PROCESSED = "processed", "Traité"
+        FAILED = "failed", "Échec"
+        IGNORED = "ignored", "Ignoré"
+
+    instance = models.ForeignKey(
+        EvolutionInstance,
+        on_delete=models.CASCADE,
+        related_name="webhook_events",
+    )
+
+    event_type = models.CharField(
+        max_length=100,
+        db_index=True,
+    )
+
+    event_id = models.CharField(
+        max_length=255,
+        blank=True,
+        db_index=True,
+    )
+
+    deduplication_key = models.CharField(
+        max_length=64,
+        unique=True,
+    )
+
+    payload = models.JSONField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.RECEIVED,
+        db_index=True,
+    )
+
+    attempts = models.PositiveIntegerField(
+        default=0,
+    )
+
+    last_error = models.TextField(
+        blank=True,
+    )
+
+    received_at = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True,
+    )
+
+    processed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        return (
+            f"{self.event_type} - "
+            f"{self.instance.instance_name}"
+        )
