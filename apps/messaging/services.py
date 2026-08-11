@@ -10,6 +10,10 @@ from apps.evolution.client import (
 )
 from apps.evolution.models import EvolutionInstance
 
+from apps.ghl.client import (
+    GHLAPIError,
+    GHLClient,
+)
 from .models import (
     BulkCampaign,
     BulkCampaignRecipient,
@@ -382,21 +386,34 @@ def render_campaign_message(
 
     return message.strip()
 
-    def extract_evolution_message_id(
-        response,
-    ) -> str:
+def extract_evolution_message_id(
+    response,
+) -> str:
 
-        if isinstance(response, list):
+    if isinstance(response, list):
 
-            if not response:
-                return ""
-
-            response = response[0]
-
-        if not isinstance(response, dict):
+        if not response:
             return ""
 
-        key = response.get("key")
+        response = response[0]
+
+    if not isinstance(response, dict):
+        return ""
+
+    key = response.get("key")
+
+    if isinstance(key, dict):
+
+        message_id = key.get("id")
+
+        if message_id:
+            return str(message_id)
+
+    data = response.get("data")
+
+    if isinstance(data, dict):
+
+        key = data.get("key")
 
         if isinstance(key, dict):
 
@@ -405,127 +422,114 @@ def render_campaign_message(
             if message_id:
                 return str(message_id)
 
-        data = response.get("data")
-
-        if isinstance(data, dict):
-
-            key = data.get("key")
-
-            if isinstance(key, dict):
-
-                message_id = key.get("id")
-
-                if message_id:
-                    return str(message_id)
-
-        return ""
+    return ""
     
-    def refresh_campaign_progress(
-        campaign_id: int,
-    ) -> BulkCampaign:
+def refresh_campaign_progress(
+    campaign_id: int,
+) -> BulkCampaign:
 
-        campaign = BulkCampaign.objects.get(
-            pk=campaign_id
+    campaign = BulkCampaign.objects.get(
+        pk=campaign_id
+    )
+
+    recipients = campaign.recipients.all()
+
+    sent_count = recipients.filter(
+        status=BulkCampaignRecipient.Status.SENT
+    ).count()
+
+    failed_count = recipients.filter(
+        status=BulkCampaignRecipient.Status.FAILED
+    ).count()
+
+    ready_count = recipients.filter(
+        status=BulkCampaignRecipient.Status.READY
+    ).count()
+
+    processing_count = recipients.filter(
+        status=BulkCampaignRecipient.Status.PROCESSING
+    ).count()
+
+    pending_count = recipients.filter(
+        status=BulkCampaignRecipient.Status.PENDING
+    ).count()
+
+    validating_count = recipients.filter(
+        status=BulkCampaignRecipient.Status.VALIDATING
+    ).count()
+
+    not_on_whatsapp_count = recipients.filter(
+        status=(
+            BulkCampaignRecipient
+            .Status.NOT_ON_WHATSAPP
         )
+    ).count()
 
-        recipients = campaign.recipients.all()
+    campaign.sent_count = sent_count
+    campaign.failed_count = failed_count
 
-        sent_count = recipients.filter(
-            status=BulkCampaignRecipient.Status.SENT
-        ).count()
+    campaign.not_on_whatsapp_count = (
+        not_on_whatsapp_count
+    )
 
-        failed_count = recipients.filter(
-            status=BulkCampaignRecipient.Status.FAILED
-        ).count()
+    remaining = (
+        ready_count
+        + processing_count
+        + pending_count
+        + validating_count
+    )
 
-        ready_count = recipients.filter(
-            status=BulkCampaignRecipient.Status.READY
-        ).count()
+    if remaining > 0:
 
-        processing_count = recipients.filter(
-            status=BulkCampaignRecipient.Status.PROCESSING
-        ).count()
-
-        pending_count = recipients.filter(
-            status=BulkCampaignRecipient.Status.PENDING
-        ).count()
-
-        validating_count = recipients.filter(
-            status=BulkCampaignRecipient.Status.VALIDATING
-        ).count()
-
-        not_on_whatsapp_count = recipients.filter(
-            status=(
-                BulkCampaignRecipient
-                .Status.NOT_ON_WHATSAPP
+        if campaign.status in [
+            BulkCampaign.Status.QUEUED,
+            BulkCampaign.Status.RUNNING,
+        ]:
+            campaign.status = (
+                BulkCampaign.Status.RUNNING
             )
-        ).count()
 
-        campaign.sent_count = sent_count
-        campaign.failed_count = failed_count
+    else:
 
-        campaign.not_on_whatsapp_count = (
-            not_on_whatsapp_count
-        )
+        if sent_count > 0 and failed_count > 0:
 
-        remaining = (
-            ready_count
-            + processing_count
-            + pending_count
-            + validating_count
-        )
+            campaign.status = (
+                BulkCampaign.Status.PARTIAL
+            )
 
-        if remaining > 0:
+        elif sent_count > 0:
 
-            if campaign.status in [
-                BulkCampaign.Status.QUEUED,
-                BulkCampaign.Status.RUNNING,
-            ]:
-                campaign.status = (
-                    BulkCampaign.Status.RUNNING
-                )
+            campaign.status = (
+                BulkCampaign.Status.COMPLETED
+            )
+
+        elif failed_count > 0:
+
+            campaign.status = (
+                BulkCampaign.Status.FAILED
+            )
 
         else:
 
-            if sent_count > 0 and failed_count > 0:
+            campaign.status = (
+                BulkCampaign.Status.COMPLETED
+            )
 
-                campaign.status = (
-                    BulkCampaign.Status.PARTIAL
-                )
+        if campaign.completed_at is None:
+            campaign.completed_at = timezone.now()
 
-            elif sent_count > 0:
+    campaign.save(
+        update_fields=[
+            "status",
+            "sent_count",
+            "failed_count",
+            "not_on_whatsapp_count",
+            "completed_at",
+            "updated_at",
+        ]
+    )
 
-                campaign.status = (
-                    BulkCampaign.Status.COMPLETED
-                )
-
-            elif failed_count > 0:
-
-                campaign.status = (
-                    BulkCampaign.Status.FAILED
-                )
-
-            else:
-
-                campaign.status = (
-                    BulkCampaign.Status.COMPLETED
-                )
-
-            if campaign.completed_at is None:
-                campaign.completed_at = timezone.now()
-
-        campaign.save(
-            update_fields=[
-                "status",
-                "sent_count",
-                "failed_count",
-                "not_on_whatsapp_count",
-                "completed_at",
-                "updated_at",
-            ]
-        )
-
-        return campaign
+    return campaign
 
 def claim_next_bulk_recipient():
     """
@@ -727,25 +731,31 @@ def process_bulk_recipient(
         ]
     )
 
-    client = EvolutionClient()
+    ghl_client = GHLClient(
+        campaign.installation
+    )
 
     try:
 
-        response = client.send_text(
-            instance_name=(
-                evolution_instance.instance_name
-            ),
-            number=(
-                recipient.normalized_phone
-            ),
-            text=rendered_message,
-            delay_ms=1000,
+        response = (
+            ghl_client.send_provider_message(
+                contact_id=(
+                    recipient.ghl_contact_id
+                ),
+                message=rendered_message,
+            )
         )
 
-    except EvolutionAPIError as exc:
+    except GHLAPIError as exc:
 
         recipient.status = (
-            BulkCampaignRecipient.Status.FAILED
+            BulkCampaignRecipient
+            .Status.FAILED
+        )
+
+        recipient.provider_delivery_status = (
+            BulkCampaignRecipient
+            .ProviderDeliveryStatus.FAILED
         )
 
         recipient.last_error = str(exc)
@@ -753,6 +763,7 @@ def process_bulk_recipient(
         recipient.save(
             update_fields=[
                 "status",
+                "provider_delivery_status",
                 "last_error",
                 "updated_at",
             ]
@@ -768,40 +779,112 @@ def process_bulk_recipient(
             "error": str(exc),
         }
 
-    message_id = (
-        extract_evolution_message_id(
+
+    ghl_message_id, ghl_conversation_id = (
+        extract_ghl_message_ids(
             response
         )
     )
 
-    recipient.status = (
-        BulkCampaignRecipient.Status.SENT
+
+    #
+    # IMPORTANT :
+    # le webhook GHL peut arriver très rapidement,
+    # éventuellement avant cette partie.
+    #
+    # On recharge donc le recipient avant
+    # de modifier provider_delivery_status.
+    #
+
+    recipient.refresh_from_db()
+
+
+    recipient.ghl_message_id = (
+        ghl_message_id
+        or recipient.ghl_message_id
     )
 
-    recipient.evolution_message_id = (
-        message_id
+    recipient.ghl_conversation_id = (
+        ghl_conversation_id
+        or recipient.ghl_conversation_id
     )
 
-    recipient.sent_at = timezone.now()
+    recipient.ghl_history_synced_at = (
+        timezone.now()
+    )
 
-    recipient.last_error = ""
+
+    if (
+        recipient.provider_delivery_status
+        == (
+            BulkCampaignRecipient
+            .ProviderDeliveryStatus.PENDING
+        )
+    ):
+        recipient.provider_delivery_status = (
+            BulkCampaignRecipient
+            .ProviderDeliveryStatus.SUBMITTED
+        )
+
 
     recipient.save(
         update_fields=[
-            "status",
-            "evolution_message_id",
-            "sent_at",
-            "last_error",
+            "ghl_message_id",
+            "ghl_conversation_id",
+            "ghl_history_synced_at",
+            "provider_delivery_status",
             "updated_at",
         ]
     )
 
-    refresh_campaign_progress(
-        campaign.pk
-    )
-
     return {
-        "status": "sent",
+        "status": "submitted_to_ghl",
         "recipient_id": recipient.pk,
-        "message_id": message_id,
+        "ghl_message_id": (
+            recipient.ghl_message_id
+        ),
+        "ghl_conversation_id": (
+            recipient.ghl_conversation_id
+        ),
     }
+
+def extract_ghl_message_ids(
+        response: dict,
+    ) -> tuple[str, str]:
+
+        if not isinstance(response, dict):
+            return "", ""
+
+        message_id = str(
+            response.get("messageId")
+            or ""
+        ).strip()
+
+        conversation_id = str(
+            response.get("conversationId")
+            or ""
+        ).strip()
+
+        if (
+            not message_id
+            and isinstance(
+                response.get("data"),
+                dict,
+            )
+        ):
+            data = response["data"]
+
+            message_id = str(
+                data.get("messageId")
+                or ""
+            ).strip()
+
+            conversation_id = str(
+                data.get("conversationId")
+                or ""
+            ).strip()
+
+        return (
+            message_id,
+            conversation_id,
+        )

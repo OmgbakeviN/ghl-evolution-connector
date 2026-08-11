@@ -190,4 +190,110 @@ class GHLClient:
         # l'objet contact.
         return result
 
+    def send_provider_message(
+        self,
+        *,
+        contact_id: str,
+        message: str,
+    ) -> dict[str, Any]:
 
+        contact_id = str(
+            contact_id or ""
+        ).strip()
+
+        message = str(
+            message or ""
+        ).strip()
+
+        provider_id = str(
+            getattr(
+                settings,
+                "GHL_CONVERSATION_PROVIDER_ID",
+                "",
+            )
+            or ""
+        ).strip()
+
+        if not contact_id:
+            raise GHLAPIError(
+                "Le contact HighLevel est obligatoire."
+            )
+
+        if not message:
+            raise GHLAPIError(
+                "Le message est vide."
+            )
+
+        if not provider_id:
+            raise GHLAPIError(
+                "GHL_CONVERSATION_PROVIDER_ID "
+                "n'est pas configuré."
+            )
+
+        payload = {
+            "type": "SMS",
+            "contactId": contact_id,
+            "message": message,
+            "conversationProviderId": provider_id,
+        }
+
+        return self._request(
+            "POST",
+            "/conversations/messages",
+            json=payload,
+        )
+    
+    def send_provider_message(
+        self,
+        *,
+        contact_id: str,
+        message: str,
+    ) -> dict[str, Any]:
+
+        contact_id = str(
+            contact_id or ""
+        ).strip()
+
+        message = str(
+            message or ""
+        ).strip()
+
+        provider_id = str(
+            getattr(
+                settings,
+                "GHL_CONVERSATION_PROVIDER_ID",
+                "",
+            )
+            or ""
+        ).strip()
+
+        if not contact_id:
+            raise GHLAPIError(
+                "Le contact HighLevel est obligatoire."
+            )
+
+        if not message:
+            raise GHLAPIError(
+                "Le message est vide."
+            )
+
+        if not provider_id:
+            raise GHLAPIError(
+                "GHL_CONVERSATION_PROVIDER_ID "
+                "n'est pas configuré."
+            )
+
+        payload = {
+            "type": "SMS",
+            "contactId": contact_id,
+            "message": message,
+            "conversationProviderId": provider_id,
+        }
+
+        return self._request(
+            "POST",
+            "/conversations/messages",
+            json=payload,
+        )
+    
+    

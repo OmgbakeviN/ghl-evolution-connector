@@ -87,6 +87,12 @@ class BulkCampaign(models.Model):
 
 class BulkCampaignRecipient(models.Model):
 
+    class ProviderDeliveryStatus(models.TextChoices):
+        PENDING = "pending", "En attente GHL"
+        SUBMITTED = "submitted", "Transmis à GHL"
+        SENT = "sent", "Envoyé par le provider"
+        FAILED = "failed", "Échec du provider"
+
     class Status(models.TextChoices):
         PENDING = "pending", "En attente"
 
@@ -207,6 +213,31 @@ class BulkCampaignRecipient(models.Model):
 
     updated_at = models.DateTimeField(
         auto_now=True,
+    )
+
+    ghl_message_id = models.CharField(
+        max_length=150,
+        null=True,
+        blank=True,
+        unique=True,
+    )
+
+    ghl_conversation_id = models.CharField(
+        max_length=150,
+        null=True,
+        blank=True,
+    )
+
+    ghl_history_synced_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    provider_delivery_status = models.CharField(
+        max_length=20,
+        choices=ProviderDeliveryStatus.choices,
+        default=ProviderDeliveryStatus.PENDING,
+        db_index=True,
     )
 
     class Meta:

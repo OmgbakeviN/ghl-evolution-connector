@@ -182,3 +182,8 @@ BULK_WORKER_IDLE_SECONDS = int(
         "2",
     )
 )
+
+GHL_CONVERSATION_PROVIDER_ID = os.getenv(
+    "GHL_CONVERSATION_PROVIDER_ID",
+    "",
+).strip()

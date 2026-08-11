@@ -145,7 +145,18 @@ class Command(BaseCommand):
                     "status"
                 )
 
-                if status == "sent":
+                if status == "submitted_to_ghl":
+
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            (
+                                f"Recipient #{recipient_id} "
+                                "transmis à HighLevel."
+                            )
+                        )
+                    )
+
+                elif status == "sent":
 
                     self.stdout.write(
                         self.style.SUCCESS(

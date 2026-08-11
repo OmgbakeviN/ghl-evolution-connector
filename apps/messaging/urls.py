@@ -7,6 +7,8 @@ from .views import ( create_bulk_campaign_draft,
     list_bulk_campaigns
 )
 
+from .provider_views import ghl_provider_outbound
+
 
 app_name = "messaging"
 
@@ -36,5 +38,10 @@ urlpatterns = [
         "campaigns/",
         list_bulk_campaigns,
         name="list-campaigns",
+    ),
+    path(
+        "provider/outbound/",
+        ghl_provider_outbound,
+        name="provider-outbound",
     ),
 ]
