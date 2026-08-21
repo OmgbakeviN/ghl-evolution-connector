@@ -63,6 +63,18 @@ class BulkCampaign(models.Model):
         default=0,
     )
 
+    source_campaign = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="relaunches",
+    )
+
+    relaunch_number = models.PositiveIntegerField(
+        default=0,
+    )
+
     started_at = models.DateTimeField(
         null=True,
         blank=True,
@@ -189,6 +201,11 @@ class BulkCampaignRecipient(models.Model):
         db_index=True,
     )
 
+    evolution_message_ids = models.JSONField(
+        default=list,
+        blank=True,
+    )
+
     evolution_message_id = models.CharField(
         max_length=255,
         blank=True,
@@ -255,4 +272,126 @@ class BulkCampaignRecipient(models.Model):
         return (
             f"{self.ghl_contact_id} - "
             f"{self.campaign.name}"
+        )
+    
+class CampaignAttachment(models.Model):
+
+    class Kind(models.TextChoices):
+        IMAGE = "image", "Image"
+        DOCUMENT = "document", "Document"
+
+    campaign = models.ForeignKey(
+        BulkCampaign,
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+
+    file = models.FileField(
+        upload_to="campaigns/%Y/%m/%d/",
+    )
+
+    original_name = models.CharField(
+        max_length=255,
+    )
+
+    mime_type = models.CharField(
+        max_length=150,
+        blank=True,
+    )
+
+    size = models.PositiveBigIntegerField(
+        default=0,
+    )
+
+    kind = models.CharField(
+        max_length=20,
+        choices=Kind.choices,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    def public_url(self):
+        from django.conf import settings
+
+        base_url = (
+            settings.APP_PUBLIC_URL
+            .rstrip("/")
+        )
+
+        return (
+            f"{base_url}"
+            f"{self.file.url}"
+        )
+
+    def __str__(self):
+        return (
+            f"{self.original_name} "
+            f"- {self.campaign.name}"
+        )
+
+class ProviderOutboundJob(models.Model):
+    """
+    File PostgreSQL pour les Delivery URL HighLevel.
+
+    Le webhook HighLevel est acquitté immédiatement, puis le worker
+    envoie réellement le message vers Evolution API.
+    """
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        PROCESSING = "processing", "En cours"
+        SENT = "sent", "Envoyé"
+        FAILED = "failed", "Échec"
+
+    recipient = models.ForeignKey(
+        BulkCampaignRecipient,
+        on_delete=models.CASCADE,
+        related_name="provider_outbound_jobs",
+    )
+
+    ghl_message_id = models.CharField(
+        max_length=150,
+        unique=True,
+        db_index=True,
+    )
+
+    payload = models.JSONField(
+        default=dict,
+        blank=True,
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True,
+    )
+
+    attempts = models.PositiveIntegerField(
+        default=0,
+    )
+
+    last_error = models.TextField(
+        blank=True,
+    )
+
+    processed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    def __str__(self):
+        return (
+            f"{self.ghl_message_id} - "
+            f"{self.status}"
         )

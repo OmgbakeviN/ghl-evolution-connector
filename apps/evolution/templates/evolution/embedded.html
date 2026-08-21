@@ -1,1266 +1,1038 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
 
-<head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Evolution Messaging</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-</head>
+  </head>
 
-<body class="min-h-screen bg-slate-100 p-4 text-slate-900 sm:p-6">
+  <body class="min-h-screen bg-slate-100 p-4 text-slate-900 sm:p-6">
     <main class="mx-auto max-w-6xl">
+      <header
+        class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <p
+            class="text-sm font-semibold uppercase tracking-wider text-emerald-600"
+          >
+            Evolution Messaging
+          </p>
 
-        <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-950">
+            Connexion WhatsApp
+          </h1>
 
-            <div>
-                <p class="text-sm font-semibold uppercase tracking-wider text-emerald-600">
-                    Evolution Messaging
-                </p>
-
-                <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-950">
-                    Connexion WhatsApp
-                </h1>
-
-                <p class="mt-2 text-sm text-slate-500">
-                    Connectez le numéro WhatsApp de votre sous-compte HighLevel.
-                </p>
-            </div>
-
-            <button id="refresh-button" type="button" disabled
-                class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">
-                <svg id="refresh-icon" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2">
-                    <path d="M20 6v6h-6"></path>
-                    <path d="M4 18v-6h6"></path>
-                    <path d="M18.5 9A7 7 0 0 0 6 5.5L4 8"></path>
-                    <path d="M5.5 15A7 7 0 0 0 18 18.5l2-2.5"></path>
-                </svg>
-
-                <span id="refresh-label">
-                    Actualiser
-                </span>
-            </button>
-
-        </header>
-
-        <div class="mb-6 inline-flex rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
-
-            <button id="connection-tab" type="button"
-                class="rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white">
-                Connexion WhatsApp
-            </button>
-
-            <button id="bulk-tab" type="button"
-                class="rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100">
-                Bulk Messages
-            </button>
-
+          <p class="mt-2 text-sm text-slate-500">
+            Connectez le numéro WhatsApp de votre sous-compte HighLevel.
+          </p>
         </div>
 
-        <div id="error-container" class="mb-6 hidden rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800">
-            <p class="font-bold">
-                Une erreur est survenue
-            </p>
+        <button
+          id="refresh-button"
+          type="button"
+          disabled
+          class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <svg
+            id="refresh-icon"
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M20 6v6h-6"></path>
+            <path d="M4 18v-6h6"></path>
+            <path d="M18.5 9A7 7 0 0 0 6 5.5L4 8"></path>
+            <path d="M5.5 15A7 7 0 0 0 18 18.5l2-2.5"></path>
+          </svg>
 
-            <p id="error-message" class="mt-1 break-words text-sm"></p>
-        </div>
-        <div id="connection-panel">
-            <div id="bulk-panel" class="hidden">
-                <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <span id="refresh-label"> Actualiser </span>
+        </button>
+      </header>
 
-                    <div class="border-b border-slate-200 p-6 sm:p-8">
+      <div
+        class="mb-6 inline-flex rounded-2xl border border-slate-200 bg-white p-1 shadow-sm"
+      >
+        <button
+          id="connection-tab"
+          type="button"
+          class="rounded-xl bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white"
+        >
+          Connexion WhatsApp
+        </button>
 
-                        <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <button
+          id="bulk-tab"
+          type="button"
+          class="rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
+        >
+          Bulk Messages
+        </button>
+      </div>
 
-                            <div>
-                                <h2 class="text-2xl font-bold text-slate-950">
-                                    Bulk Messages
-                                </h2>
+      <div
+        id="error-container"
+        class="mb-6 hidden rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800"
+      >
+        <p class="font-bold">Une erreur est survenue</p>
 
-                                <p class="mt-1 text-sm text-slate-500">
-                                    Sélectionnez les contacts HighLevel qui recevront votre campagne WhatsApp.
-                                </p>
-                            </div>
+        <p id="error-message" class="mt-1 break-words text-sm"></p>
+      </div>
+      <div id="connection-panel">
+        <div id="bulk-panel" class="hidden">
+          <section
+            class="rounded-3xl border border-slate-200 bg-white shadow-sm"
+          >
+            <div class="border-b border-slate-200 p-6 sm:p-8">
+              <div
+                class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between"
+              >
+                <div>
+                  <h2 class="text-2xl font-bold text-slate-950">
+                    Bulk Messages
+                  </h2>
 
-                            <div class="rounded-xl bg-emerald-50 px-4 py-3 text-sm">
-                                <span id="selected-count" class="font-bold text-emerald-700">
-                                    0
-                                </span>
-
-                                <span class="text-emerald-700">
-                                    contact(s) sélectionné(s)
-                                </span>
-                            </div>
-
-                        </div>
-
-                        <div class="mt-6 flex flex-col gap-3 sm:flex-row">
-
-                            <div class="relative flex-1">
-
-                                <svg class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="11" cy="11" r="8"></circle>
-                                    <path d="m21 21-4.3-4.3"></path>
-                                </svg>
-
-                                <input id="contact-search" type="search" placeholder="Rechercher un contact..."
-                                    class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm outline-none transition focus:border-slate-400 focus:bg-white">
-
-                            </div>
-
-                            <button id="search-button" type="button"
-                                class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold transition hover:bg-slate-50">
-                                Rechercher
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="border-b border-slate-200 px-6 py-4 sm:px-8">
-
-                        <label class="flex cursor-pointer items-center gap-3">
-
-                            <input id="select-all" type="checkbox" class="h-4 w-4 rounded border-slate-300">
-
-                            <span class="text-sm font-semibold text-slate-700">
-                                Sélectionner les contacts visibles
-                            </span>
-
-                        </label>
-
-                    </div>
-
-
-                    <div id="contacts-loading" class="hidden py-16 text-center">
-                        <div
-                            class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900">
-                        </div>
-
-                        <p class="mt-4 text-sm text-slate-500">
-                            Chargement des contacts…
-                        </p>
-                    </div>
-
-
-                    <div id="contacts-empty" class="hidden px-6 py-16 text-center">
-                        <p class="font-semibold text-slate-700">
-                            Aucun contact trouvé.
-                        </p>
-
-                        <p class="mt-1 text-sm text-slate-500">
-                            Essayez une autre recherche.
-                        </p>
-                    </div>
-
-
-                    <div id="contacts-list" class="divide-y divide-slate-100"></div>
-
-
-                    <div
-                        class="flex flex-col gap-4 border-t border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-
-                        <div class="text-sm text-slate-500">
-
-                            <span id="contacts-total">
-                                0 contact
-                            </span>
-
-                        </div>
-
-                        <div class="flex items-center gap-2">
-
-                            <button id="previous-page" type="button" disabled
-                                class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40">
-                                Précédent
-                            </button>
-
-                            <span id="page-number" class="px-3 text-sm font-medium text-slate-500">
-                                Page 1
-                            </span>
-
-                            <button id="next-page" type="button"
-                                class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40">
-                                Suivant
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-                <div class="mt-6 flex justify-end">
-
-                    <button id="continue-campaign" type="button" disabled
-                        class="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40">
-                        Continuer avec les contacts sélectionnés
-                    </button>
-
+                  <p class="mt-1 text-sm text-slate-500">
+                    Sélectionnez les contacts HighLevel qui recevront votre
+                    campagne WhatsApp.
+                  </p>
                 </div>
 
+                <div class="rounded-xl bg-emerald-50 px-4 py-3 text-sm">
+                  <span id="selected-count" class="font-bold text-emerald-700">
+                    0
+                  </span>
+
+                  <span class="text-emerald-700">
+                    contact(s) sélectionné(s)
+                  </span>
+                </div>
+              </div>
+
+              <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+                <div class="relative flex-1">
+                  <svg
+                    class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                  </svg>
+
+                  <input
+                    id="contact-search"
+                    type="search"
+                    placeholder="Rechercher un contact..."
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
+                  />
+                </div>
+
+                <button
+                  id="search-button"
+                  type="button"
+                  class="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold transition hover:bg-slate-50"
+                >
+                  Rechercher
+                </button>
+              </div>
             </div>
-            <div class="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
 
-                <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <div class="border-b border-slate-200 px-6 py-4 sm:px-8">
+              <label class="flex cursor-pointer items-center gap-3">
+                <input
+                  id="select-all"
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-slate-300"
+                />
 
-                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-                        <div>
-                            <h2 class="text-xl font-bold text-slate-950">
-                                État de la connexion
-                            </h2>
-
-                            <p class="mt-1 text-sm text-slate-500">
-                                Actualisation automatique toutes les 10 secondes.
-                            </p>
-                        </div>
-
-                        <div id="status-badge"
-                            class="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700">
-                            <span id="status-dot" class="h-2.5 w-2.5 rounded-full bg-slate-400"></span>
-
-                            <span id="status-text">
-                                Initialisation…
-                            </span>
-                        </div>
-
-                    </div>
-
-                    <div class="mt-8">
-
-                        <div id="loading-container"
-                            class="flex min-h-96 items-center justify-center rounded-3xl border border-slate-200 bg-slate-50">
-                            <div class="text-center">
-                                <div
-                                    class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900">
-                                </div>
-
-                                <p id="loading-message" class="mt-4 text-sm font-medium text-slate-500">
-                                    Validation du contexte HighLevel…
-                                </p>
-                            </div>
-                        </div>
-
-                        <div id="connected-container"
-                            class="hidden min-h-96 items-center justify-center rounded-3xl border border-emerald-200 bg-emerald-50 p-8 text-center">
-                            <div>
-                                <div
-                                    class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white">
-                                    <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="3">
-                                        <path d="m5 12 4 4L19 6"></path>
-                                    </svg>
-                                </div>
-
-                                <h3 class="mt-5 text-2xl font-bold text-emerald-950">
-                                    WhatsApp est connecté
-                                </h3>
-
-                                <p id="connected-profile" class="mt-2 text-sm text-emerald-700">
-                                    Le numéro est associé à Evolution API.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div id="qr-container" class="hidden">
-                            <div class="mx-auto max-w-sm rounded-3xl border border-slate-200 bg-slate-50 p-5">
-
-                                <div id="qr-loading"
-                                    class="flex aspect-square items-center justify-center rounded-2xl bg-white">
-                                    <div class="text-center">
-                                        <div
-                                            class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900">
-                                        </div>
-
-                                        <p class="mt-4 text-sm text-slate-500">
-                                            Génération du QR Code…
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <img id="qr-image" src="" alt="QR Code de connexion WhatsApp"
-                                    class="hidden aspect-square w-full rounded-2xl bg-white object-contain">
-
-                            </div>
-
-                            <div class="mx-auto mt-6 max-w-lg">
-
-                                <h3 class="text-center text-lg font-bold">
-                                    Scanner avec WhatsApp
-                                </h3>
-
-                                <ol class="mt-5 space-y-3 text-sm text-slate-600">
-
-                                    <li class="flex gap-3">
-                                        <span
-                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
-                                            1
-                                        </span>
-
-                                        Ouvrez WhatsApp sur votre téléphone.
-                                    </li>
-
-                                    <li class="flex gap-3">
-                                        <span
-                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
-                                            2
-                                        </span>
-
-                                        Ouvrez Appareils connectés.
-                                    </li>
-
-                                    <li class="flex gap-3">
-                                        <span
-                                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
-                                            3
-                                        </span>
-
-                                        Sélectionnez Connecter un appareil et scannez ce QR Code.
-                                    </li>
-
-                                </ol>
-
-                                <p id="qr-count" class="mt-5 text-center text-xs text-slate-400"></p>
-
-                            </div>
-                        </div>
-
-                    </div>
-                </section>
-
-                <aside class="space-y-6">
-
-                    <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-
-                        <h2 class="text-lg font-bold">
-                            Informations
-                        </h2>
-
-                        <dl class="mt-5 space-y-5">
-
-                            <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                    Sous-compte
-                                </dt>
-
-                                <dd id="location-id" class="mt-1 break-all text-sm font-medium">
-                                    —
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                    Utilisateur
-                                </dt>
-
-                                <dd id="user-name" class="mt-1 text-sm font-medium">
-                                    —
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                    Instance
-                                </dt>
-
-                                <dd id="instance-name" class="mt-1 break-all text-sm font-medium">
-                                    —
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                    Intégration
-                                </dt>
-
-                                <dd id="integration" class="mt-1 text-sm font-medium">
-                                    —
-                                </dd>
-                            </div>
-
-                            <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                    Dernière vérification
-                                </dt>
-
-                                <dd id="last-synced" class="mt-1 text-sm font-medium">
-                                    —
-                                </dd>
-                            </div>
-
-                        </dl>
-                    </section>
-
-                    <section class="rounded-3xl border border-blue-200 bg-blue-50 p-6">
-
-                        <h2 class="font-bold text-blue-950">
-                            QR Code temporaire
-                        </h2>
-
-                        <p class="mt-2 text-sm leading-6 text-blue-800">
-                            Si le QR Code expire, un nouveau sera récupéré automatiquement auprès d’Evolution API.
-                        </p>
-
-                    </section>
-
-                </aside>
-
+                <span class="text-sm font-semibold text-slate-700">
+                  Sélectionner les contacts visibles
+                </span>
+              </label>
             </div>
+
+            <div id="contacts-loading" class="hidden py-16 text-center">
+              <div
+                class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900"
+              ></div>
+
+              <p class="mt-4 text-sm text-slate-500">
+                Chargement des contacts…
+              </p>
+            </div>
+
+            <div id="contacts-empty" class="hidden px-6 py-16 text-center">
+              <p class="font-semibold text-slate-700">Aucun contact trouvé.</p>
+
+              <p class="mt-1 text-sm text-slate-500">
+                Essayez une autre recherche.
+              </p>
+            </div>
+
+            <div id="contacts-list" class="divide-y divide-slate-100"></div>
+
+            <div
+              class="flex flex-col gap-4 border-t border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between sm:px-8"
+            >
+              <div class="text-sm text-slate-500">
+                <span id="contacts-total"> 0 contact </span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button
+                  id="previous-page"
+                  type="button"
+                  disabled
+                  class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Précédent
+                </button>
+
+                <span
+                  id="page-number"
+                  class="px-3 text-sm font-medium text-slate-500"
+                >
+                  Page 1
+                </span>
+
+                <button
+                  id="next-page"
+                  type="button"
+                  class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Suivant
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <div class="mt-6 flex justify-end">
+            <button
+              id="continue-campaign"
+              type="button"
+              disabled
+              class="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Continuer avec les contacts sélectionnés
+            </button>
+          </div>
         </div>
+        <div class="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+          <section
+            class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+          >
+            <div
+              class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <h2 class="text-xl font-bold text-slate-950">
+                  État de la connexion
+                </h2>
+
+                <p class="mt-1 text-sm text-slate-500">
+                  Actualisation automatique toutes les 10 secondes.
+                </p>
+              </div>
+
+              <div
+                id="status-badge"
+                class="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700"
+              >
+                <span
+                  id="status-dot"
+                  class="h-2.5 w-2.5 rounded-full bg-slate-400"
+                ></span>
+
+                <span id="status-text"> Initialisation… </span>
+              </div>
+            </div>
+
+            <div class="mt-8">
+              <div
+                id="loading-container"
+                class="flex min-h-96 items-center justify-center rounded-3xl border border-slate-200 bg-slate-50"
+              >
+                <div class="text-center">
+                  <div
+                    class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900"
+                  ></div>
+
+                  <p
+                    id="loading-message"
+                    class="mt-4 text-sm font-medium text-slate-500"
+                  >
+                    Validation du contexte HighLevel…
+                  </p>
+                </div>
+              </div>
+
+              <div
+                id="connected-container"
+                class="hidden min-h-96 items-center justify-center rounded-3xl border border-emerald-200 bg-emerald-50 p-8 text-center"
+              >
+                <div>
+                  <div
+                    class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white"
+                  >
+                    <svg
+                      class="h-8 w-8"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                    >
+                      <path d="m5 12 4 4L19 6"></path>
+                    </svg>
+                  </div>
+
+                  <h3 class="mt-5 text-2xl font-bold text-emerald-950">
+                    WhatsApp est connecté
+                  </h3>
+
+                  <p
+                    id="connected-profile"
+                    class="mt-2 text-sm text-emerald-700"
+                  >
+                    Le numéro est associé à Evolution API.
+                  </p>
+                </div>
+              </div>
+
+              <div id="qr-container" class="hidden">
+                <div
+                  class="mx-auto max-w-sm rounded-3xl border border-slate-200 bg-slate-50 p-5"
+                >
+                  <div
+                    id="qr-loading"
+                    class="flex aspect-square items-center justify-center rounded-2xl bg-white"
+                  >
+                    <div class="text-center">
+                      <div
+                        class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900"
+                      ></div>
+
+                      <p class="mt-4 text-sm text-slate-500">
+                        Génération du QR Code…
+                      </p>
+                    </div>
+                  </div>
+
+                  <img
+                    id="qr-image"
+                    src=""
+                    alt="QR Code de connexion WhatsApp"
+                    class="hidden aspect-square w-full rounded-2xl bg-white object-contain"
+                  />
+                </div>
+
+                <div class="mx-auto mt-6 max-w-lg">
+                  <h3 class="text-center text-lg font-bold">
+                    Scanner avec WhatsApp
+                  </h3>
+
+                  <ol class="mt-5 space-y-3 text-sm text-slate-600">
+                    <li class="flex gap-3">
+                      <span
+                        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white"
+                      >
+                        1
+                      </span>
+
+                      Ouvrez WhatsApp sur votre téléphone.
+                    </li>
+
+                    <li class="flex gap-3">
+                      <span
+                        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white"
+                      >
+                        2
+                      </span>
+
+                      Ouvrez Appareils connectés.
+                    </li>
+
+                    <li class="flex gap-3">
+                      <span
+                        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white"
+                      >
+                        3
+                      </span>
+
+                      Sélectionnez Connecter un appareil et scannez ce QR Code.
+                    </li>
+                  </ol>
+
+                  <p
+                    id="qr-count"
+                    class="mt-5 text-center text-xs text-slate-400"
+                  ></p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="space-y-6">
+            <section
+              class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            >
+              <h2 class="text-lg font-bold">Informations</h2>
+
+              <dl class="mt-5 space-y-5">
+                <div>
+                  <dt
+                    class="text-xs font-semibold uppercase tracking-wide text-slate-400"
+                  >
+                    Sous-compte
+                  </dt>
+
+                  <dd
+                    id="location-id"
+                    class="mt-1 break-all text-sm font-medium"
+                  >
+                    —
+                  </dd>
+                </div>
+
+                <div>
+                  <dt
+                    class="text-xs font-semibold uppercase tracking-wide text-slate-400"
+                  >
+                    Utilisateur
+                  </dt>
+
+                  <dd id="user-name" class="mt-1 text-sm font-medium">—</dd>
+                </div>
+
+                <div>
+                  <dt
+                    class="text-xs font-semibold uppercase tracking-wide text-slate-400"
+                  >
+                    Instance
+                  </dt>
+
+                  <dd
+                    id="instance-name"
+                    class="mt-1 break-all text-sm font-medium"
+                  >
+                    —
+                  </dd>
+                </div>
+
+                <div>
+                  <dt
+                    class="text-xs font-semibold uppercase tracking-wide text-slate-400"
+                  >
+                    Intégration
+                  </dt>
+
+                  <dd id="integration" class="mt-1 text-sm font-medium">—</dd>
+                </div>
+
+                <div>
+                  <dt
+                    class="text-xs font-semibold uppercase tracking-wide text-slate-400"
+                  >
+                    Dernière vérification
+                  </dt>
+
+                  <dd id="last-synced" class="mt-1 text-sm font-medium">—</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section class="rounded-3xl border border-blue-200 bg-blue-50 p-6">
+              <h2 class="font-bold text-blue-950">QR Code temporaire</h2>
+
+              <p class="mt-2 text-sm leading-6 text-blue-800">
+                Si le QR Code expire, un nouveau sera récupéré automatiquement
+                auprès d’Evolution API.
+              </p>
+            </section>
+          </aside>
+        </div>
+      </div>
     </main>
     <script>
-        const contextUrl = "{% url 'ghl:user-context' %}";
-        const statusUrl = "{% url 'evolution:embedded-instance-status' %}";
+      const contextUrl = "{% url 'ghl:user-context' %}";
+      const statusUrl = "{% url 'evolution:embedded-instance-status' %}";
 
-        let embeddedToken = "";
-        let currentUser = null;
-        let requestInProgress = false;
+      let embeddedToken = "";
+      let currentUser = null;
+      let requestInProgress = false;
 
-        const refreshButton = document.getElementById("refresh-button");
-        const refreshIcon = document.getElementById("refresh-icon");
-        const refreshLabel = document.getElementById("refresh-label");
+      const refreshButton = document.getElementById("refresh-button");
+      const refreshIcon = document.getElementById("refresh-icon");
+      const refreshLabel = document.getElementById("refresh-label");
 
-        const loadingContainer = document.getElementById("loading-container");
-        const loadingMessage = document.getElementById("loading-message");
+      const loadingContainer = document.getElementById("loading-container");
+      const loadingMessage = document.getElementById("loading-message");
 
-        const connectedContainer = document.getElementById(
-            "connected-container"
+      const connectedContainer = document.getElementById("connected-container");
+
+      const qrContainer = document.getElementById("qr-container");
+      const qrLoading = document.getElementById("qr-loading");
+      const qrImage = document.getElementById("qr-image");
+      const qrCount = document.getElementById("qr-count");
+
+      const statusBadge = document.getElementById("status-badge");
+      const statusDot = document.getElementById("status-dot");
+      const statusText = document.getElementById("status-text");
+
+      const errorContainer = document.getElementById("error-container");
+      const errorMessage = document.getElementById("error-message");
+
+      const statusStyles = {
+        open: {
+          label: "Connecté",
+          badge: "bg-emerald-100 text-emerald-700",
+          dot: "bg-emerald-500",
+        },
+        connecting: {
+          label: "En attente du scan",
+          badge: "bg-amber-100 text-amber-700",
+          dot: "bg-amber-500",
+        },
+        close: {
+          label: "Déconnecté",
+          badge: "bg-slate-100 text-slate-700",
+          dot: "bg-slate-500",
+        },
+        created: {
+          label: "Instance créée",
+          badge: "bg-slate-100 text-slate-700",
+          dot: "bg-slate-500",
+        },
+        error: {
+          label: "Erreur",
+          badge: "bg-red-100 text-red-700",
+          dot: "bg-red-500",
+        },
+      };
+
+      async function fetchDashboardStatus() {
+        return fetch(statusUrl, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${embeddedToken}`,
+          },
+          cache: "no-store",
+        });
+      }
+
+      function setLoading(isLoading, message = "") {
+        refreshButton.disabled = isLoading || !embeddedToken;
+
+        refreshIcon.classList.toggle("animate-spin", isLoading);
+
+        refreshLabel.textContent = isLoading ? "Actualisation…" : "Actualiser";
+
+        if (message) {
+          loadingMessage.textContent = message;
+        }
+      }
+
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorContainer.classList.remove("hidden");
+      }
+
+      function hideError() {
+        errorMessage.textContent = "";
+        errorContainer.classList.add("hidden");
+      }
+
+      function updateStatusBadge(status) {
+        const config = statusStyles[status] || statusStyles.created;
+
+        statusText.textContent = config.label;
+
+        statusBadge.className =
+          "inline-flex w-fit items-center gap-2 rounded-full " +
+          "px-3 py-1.5 text-sm font-semibold " +
+          config.badge;
+
+        statusDot.className = "h-2.5 w-2.5 rounded-full " + config.dot;
+      }
+
+      function requestHighLevelContext() {
+        return new Promise((resolve, reject) => {
+          const timeout = window.setTimeout(() => {
+            window.removeEventListener("message", messageHandler);
+
+            reject(new Error("HighLevel n'a pas retourné le contexte."));
+          }, 10000);
+
+          function messageHandler(event) {
+            if (event.source !== window.parent) {
+              return;
+            }
+
+            const data = event.data;
+
+            if (!data || data.message !== "REQUEST_USER_DATA_RESPONSE") {
+              return;
+            }
+
+            window.clearTimeout(timeout);
+
+            window.removeEventListener("message", messageHandler);
+
+            if (!data.payload) {
+              reject(new Error("Le contexte HighLevel est vide."));
+              return;
+            }
+
+            resolve(data.payload);
+          }
+
+          window.addEventListener("message", messageHandler);
+
+          window.parent.postMessage(
+            {
+              message: "REQUEST_USER_DATA",
+            },
+            "*",
+          );
+        });
+      }
+
+      async function authenticateEmbeddedPage() {
+        loadingContainer.classList.remove("hidden");
+
+        setLoading(true, "Validation du contexte HighLevel…");
+
+        const encryptedData = await requestHighLevelContext();
+
+        const response = await fetch(contextUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            encryptedData,
+          }),
+          cache: "no-store",
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message || "Le contexte HighLevel est invalide.",
+          );
+        }
+
+        embeddedToken = data.embedded_token;
+        currentUser = data.user;
+
+        document.getElementById("location-id").textContent =
+          data.location_id || "—";
+
+        document.getElementById("user-name").textContent =
+          data.user?.name || data.user?.email || "Utilisateur HighLevel";
+
+        refreshButton.disabled = false;
+      }
+
+      function updateDashboard(data) {
+        loadingContainer.classList.add("hidden");
+
+        updateStatusBadge(data.status);
+
+        document.getElementById("instance-name").textContent =
+          data.instance?.name || "—";
+
+        document.getElementById("integration").textContent =
+          data.instance?.integration || "—";
+
+        if (data.last_synced_at) {
+          document.getElementById("last-synced").textContent = new Date(
+            data.last_synced_at,
+          ).toLocaleString("fr-FR");
+        }
+
+        if (data.is_connected) {
+          qrContainer.classList.add("hidden");
+
+          connectedContainer.classList.remove("hidden");
+          connectedContainer.classList.add("flex");
+
+          const identity = [data.profile_name, data.phone_number]
+            .filter(Boolean)
+            .join(" — ");
+
+          document.getElementById("connected-profile").textContent =
+            identity || "Le numéro est associé à Evolution API.";
+
+          return;
+        }
+
+        connectedContainer.classList.add("hidden");
+        connectedContainer.classList.remove("flex");
+
+        qrContainer.classList.remove("hidden");
+
+        if (data.qr_source) {
+          qrImage.src = data.qr_source;
+          qrImage.classList.remove("hidden");
+          qrLoading.classList.add("hidden");
+        } else {
+          qrImage.classList.add("hidden");
+          qrLoading.classList.remove("hidden");
+        }
+
+        qrCount.textContent =
+          data.qr_count !== null
+            ? `QR disponible — compteur : ${data.qr_count}`
+            : "";
+      }
+
+      async function refreshDashboard(retryAuthentication = true) {
+        if (requestInProgress || !embeddedToken) {
+          return;
+        }
+
+        requestInProgress = true;
+        setLoading(true);
+
+        try {
+          let response = await fetchDashboardStatus();
+          let data = await response.json();
+
+          if (response.status === 401 && retryAuthentication) {
+            embeddedToken = "";
+
+            await authenticateEmbeddedPage();
+
+            response = await fetchDashboardStatus();
+            data = await response.json();
+          }
+
+          if (!response.ok || !data.success) {
+            throw new Error(
+              data.message || "Impossible de récupérer l'état WhatsApp.",
+            );
+          }
+
+          hideError();
+          updateDashboard(data);
+        } catch (error) {
+          updateStatusBadge("error");
+
+          showError(error.message || "Une erreur inconnue est survenue.");
+        } finally {
+          requestInProgress = false;
+          setLoading(false);
+        }
+      }
+
+      async function initializePage() {
+        try {
+          await authenticateEmbeddedPage();
+          await refreshDashboard();
+        } catch (error) {
+          loadingContainer.classList.add("hidden");
+
+          updateStatusBadge("error");
+
+          showError(
+            error.message || "Impossible d'initialiser la Custom Page.",
+          );
+
+          setLoading(false);
+        }
+      }
+
+      refreshButton.addEventListener("click", () => refreshDashboard());
+
+      window.setInterval(() => refreshDashboard(), 10000);
+
+      const connectionTab = document.getElementById("connection-tab");
+
+      const bulkTab = document.getElementById("bulk-tab");
+
+      const connectionPanel = document.getElementById("connection-panel");
+
+      const bulkPanel = document.getElementById("bulk-panel");
+
+      let contactsLoaded = false;
+
+      function activateTab(tab) {
+        const activeClasses = ["bg-slate-950", "text-white"];
+
+        const inactiveClasses = ["text-slate-600"];
+
+        connectionTab.classList.remove(...activeClasses, ...inactiveClasses);
+
+        bulkTab.classList.remove(...activeClasses, ...inactiveClasses);
+
+        if (tab === "bulk") {
+          connectionPanel.classList.add("hidden");
+          bulkPanel.classList.remove("hidden");
+
+          bulkTab.classList.add(...activeClasses);
+
+          connectionTab.classList.add(...inactiveClasses);
+
+          if (!contactsLoaded) {
+            loadContacts();
+          }
+
+          return;
+        }
+
+        bulkPanel.classList.add("hidden");
+        connectionPanel.classList.remove("hidden");
+
+        connectionTab.classList.add(...activeClasses);
+
+        bulkTab.classList.add(...inactiveClasses);
+      }
+
+      connectionTab.addEventListener("click", () => activateTab("connection"));
+
+      bulkTab.addEventListener("click", () => activateTab("bulk"));
+
+      const selectedContacts = new Map();
+
+      let currentContacts = [];
+      let currentPage = 1;
+      let totalContacts = 0;
+      const pageLimit = 25;
+
+      const contactsList = document.getElementById("contacts-list");
+
+      const contactsLoading = document.getElementById("contacts-loading");
+
+      const contactsEmpty = document.getElementById("contacts-empty");
+
+      const selectedCount = document.getElementById("selected-count");
+
+      const selectAll = document.getElementById("select-all");
+
+      const continueCampaign = document.getElementById("continue-campaign");
+
+      const contactSearch = document.getElementById("contact-search");
+
+      const previousPage = document.getElementById("previous-page");
+
+      const nextPage = document.getElementById("next-page");
+
+      function updateSelectionState() {
+        selectedCount.textContent = selectedContacts.size;
+
+        continueCampaign.disabled = selectedContacts.size === 0;
+
+        const selectableContacts = currentContacts.filter(
+          (contact) => contact.phone,
         );
 
-        const qrContainer = document.getElementById("qr-container");
-        const qrLoading = document.getElementById("qr-loading");
-        const qrImage = document.getElementById("qr-image");
-        const qrCount = document.getElementById("qr-count");
+        selectAll.checked =
+          selectableContacts.length > 0 &&
+          selectableContacts.every((contact) =>
+            selectedContacts.has(contact.id),
+          );
+      }
 
-        const statusBadge = document.getElementById("status-badge");
-        const statusDot = document.getElementById("status-dot");
-        const statusText = document.getElementById("status-text");
+      function renderContacts() {
+        contactsList.innerHTML = "";
 
-        const errorContainer = document.getElementById("error-container");
-        const errorMessage = document.getElementById("error-message");
+        contactsEmpty.classList.toggle("hidden", currentContacts.length > 0);
 
-        const statusStyles = {
-            open: {
-                label: "Connecté",
-                badge: "bg-emerald-100 text-emerald-700",
-                dot: "bg-emerald-500",
-            },
-            connecting: {
-                label: "En attente du scan",
-                badge: "bg-amber-100 text-amber-700",
-                dot: "bg-amber-500",
-            },
-            close: {
-                label: "Déconnecté",
-                badge: "bg-slate-100 text-slate-700",
-                dot: "bg-slate-500",
-            },
-            created: {
-                label: "Instance créée",
-                badge: "bg-slate-100 text-slate-700",
-                dot: "bg-slate-500",
-            },
-            error: {
-                label: "Erreur",
-                badge: "bg-red-100 text-red-700",
-                dot: "bg-red-500",
-            },
-        };
+        for (const contact of currentContacts) {
+          const row = document.createElement("label");
 
-        async function fetchDashboardStatus() {
-            return fetch(statusUrl, {
-                method: "GET",
-                headers: {
-                    "Accept": "application/json",
-                    "Authorization": `Bearer ${embeddedToken}`,
-                },
-                cache: "no-store",
-            });
-        }
+          row.className =
+            "flex items-center gap-4 px-6 py-4 transition hover:bg-slate-50 sm:px-8";
 
+          const checkbox = document.createElement("input");
 
-        function setLoading(isLoading, message = "") {
-            refreshButton.disabled = isLoading || !embeddedToken;
+          checkbox.type = "checkbox";
 
-            refreshIcon.classList.toggle(
-                "animate-spin",
-                isLoading
-            );
+          checkbox.className = "h-4 w-4 shrink-0 rounded border-slate-300";
 
-            refreshLabel.textContent = isLoading
-                ? "Actualisation…"
-                : "Actualiser";
+          checkbox.disabled = !contact.phone;
 
-            if (message) {
-                loadingMessage.textContent = message;
-            }
-        }
+          checkbox.checked = selectedContacts.has(contact.id);
 
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorContainer.classList.remove("hidden");
-        }
+          const content = document.createElement("div");
 
-        function hideError() {
-            errorMessage.textContent = "";
-            errorContainer.classList.add("hidden");
-        }
+          content.className = "min-w-0 flex-1";
 
-        function updateStatusBadge(status) {
-            const config =
-                statusStyles[status]
-                || statusStyles.created;
+          const name = document.createElement("p");
 
-            statusText.textContent = config.label;
+          name.className = "truncate text-sm font-semibold text-slate-900";
 
-            statusBadge.className =
-                "inline-flex w-fit items-center gap-2 rounded-full "
-                + "px-3 py-1.5 text-sm font-semibold "
-                + config.badge;
+          name.textContent =
+            contact.name ||
+            contact.email ||
+            contact.phone ||
+            "Contact sans nom";
 
-            statusDot.className =
-                "h-2.5 w-2.5 rounded-full "
-                + config.dot;
-        }
+          const details = document.createElement("p");
 
-        function requestHighLevelContext() {
-            return new Promise((resolve, reject) => {
-                const timeout = window.setTimeout(() => {
-                    window.removeEventListener(
-                        "message",
-                        messageHandler
-                    );
+          details.className = "mt-1 truncate text-xs text-slate-500";
 
-                    reject(
-                        new Error(
-                            "HighLevel n'a pas retourné le contexte."
-                        )
-                    );
-                }, 10000);
+          if (contact.phone) {
+            details.textContent = [contact.phone, contact.email]
+              .filter(Boolean)
+              .join(" • ");
+          } else {
+            details.textContent = "Aucun numéro WhatsApp disponible";
 
-                function messageHandler(event) {
-                    if (event.source !== window.parent) {
-                        return;
-                    }
+            details.classList.add("text-amber-600");
+          }
 
-                    const data = event.data;
+          content.appendChild(name);
+          content.appendChild(details);
 
-                    if (
-                        !data
-                        || data.message
-                        !== "REQUEST_USER_DATA_RESPONSE"
-                    ) {
-                        return;
-                    }
+          row.appendChild(checkbox);
+          row.appendChild(content);
 
-                    window.clearTimeout(timeout);
-
-                    window.removeEventListener(
-                        "message",
-                        messageHandler
-                    );
-
-                    if (!data.payload) {
-                        reject(
-                            new Error(
-                                "Le contexte HighLevel est vide."
-                            )
-                        );
-                        return;
-                    }
-
-                    resolve(data.payload);
-                }
-
-                window.addEventListener(
-                    "message",
-                    messageHandler
-                );
-
-                window.parent.postMessage(
-                    {
-                        message: "REQUEST_USER_DATA",
-                    },
-                    "*"
-                );
-            });
-        }
-
-        async function authenticateEmbeddedPage() {
-            loadingContainer.classList.remove("hidden");
-
-            setLoading(
-                true,
-                "Validation du contexte HighLevel…"
-            );
-
-            const encryptedData =
-                await requestHighLevelContext();
-
-            const response = await fetch(contextUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                },
-                body: JSON.stringify({
-                    encryptedData,
-                }),
-                cache: "no-store",
-            });
-
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error(
-                    data.message
-                    || "Le contexte HighLevel est invalide."
-                );
-            }
-
-            embeddedToken = data.embedded_token;
-            currentUser = data.user;
-
-            document.getElementById(
-                "location-id"
-            ).textContent = data.location_id || "—";
-
-            document.getElementById(
-                "user-name"
-            ).textContent =
-                data.user?.name
-                || data.user?.email
-                || "Utilisateur HighLevel";
-
-            refreshButton.disabled = false;
-        }
-
-        function updateDashboard(data) {
-            loadingContainer.classList.add("hidden");
-
-            updateStatusBadge(data.status);
-
-            document.getElementById(
-                "instance-name"
-            ).textContent = data.instance?.name || "—";
-
-            document.getElementById(
-                "integration"
-            ).textContent = data.instance?.integration || "—";
-
-            if (data.last_synced_at) {
-                document.getElementById(
-                    "last-synced"
-                ).textContent = new Date(
-                    data.last_synced_at
-                ).toLocaleString("fr-FR");
-            }
-
-            if (data.is_connected) {
-                qrContainer.classList.add("hidden");
-
-                connectedContainer.classList.remove("hidden");
-                connectedContainer.classList.add("flex");
-
-                const identity = [
-                    data.profile_name,
-                    data.phone_number,
-                ].filter(Boolean).join(" — ");
-
-                document.getElementById(
-                    "connected-profile"
-                ).textContent = identity
-                    || "Le numéro est associé à Evolution API.";
-
-                return;
-            }
-
-            connectedContainer.classList.add("hidden");
-            connectedContainer.classList.remove("flex");
-
-            qrContainer.classList.remove("hidden");
-
-            if (data.qr_source) {
-                qrImage.src = data.qr_source;
-                qrImage.classList.remove("hidden");
-                qrLoading.classList.add("hidden");
+          checkbox.addEventListener("change", () => {
+            if (checkbox.checked) {
+              selectedContacts.set(contact.id, contact);
             } else {
-                qrImage.classList.add("hidden");
-                qrLoading.classList.remove("hidden");
-            }
-
-            qrCount.textContent =
-                data.qr_count !== null
-                    ? `QR disponible — compteur : ${data.qr_count}`
-                    : "";
-        }
-
-        async function refreshDashboard(
-            retryAuthentication = true
-        ) {
-            if (requestInProgress || !embeddedToken) {
-                return;
-            }
-
-            requestInProgress = true;
-            setLoading(true);
-
-            try {
-                let response = await fetchDashboardStatus();
-                let data = await response.json();
-
-                if (
-                    response.status === 401
-                    && retryAuthentication
-                ) {
-                    embeddedToken = "";
-
-                    await authenticateEmbeddedPage();
-
-                    response = await fetchDashboardStatus();
-                    data = await response.json();
-                }
-
-                if (!response.ok || !data.success) {
-                    throw new Error(
-                        data.message
-                        || "Impossible de récupérer l'état WhatsApp."
-                    );
-                }
-
-                hideError();
-                updateDashboard(data);
-
-            } catch (error) {
-                updateStatusBadge("error");
-
-                showError(
-                    error.message
-                    || "Une erreur inconnue est survenue."
-                );
-            } finally {
-                requestInProgress = false;
-                setLoading(false);
-            }
-        }
-
-        async function initializePage() {
-            try {
-                await authenticateEmbeddedPage();
-                await refreshDashboard();
-            } catch (error) {
-                loadingContainer.classList.add("hidden");
-
-                updateStatusBadge("error");
-
-                showError(
-                    error.message
-                    || "Impossible d'initialiser la Custom Page."
-                );
-
-                setLoading(false);
-            }
-        }
-
-        refreshButton.addEventListener(
-            "click",
-            () => refreshDashboard()
-        );
-
-        window.setInterval(
-            () => refreshDashboard(),
-            10000
-        );
-
-        const connectionTab = document.getElementById(
-            "connection-tab"
-        );
-
-        const bulkTab = document.getElementById(
-            "bulk-tab"
-        );
-
-        const connectionPanel = document.getElementById(
-            "connection-panel"
-        );
-
-        const bulkPanel = document.getElementById(
-            "bulk-panel"
-        );
-
-        let contactsLoaded = false;
-
-
-        function activateTab(tab) {
-
-            const activeClasses = [
-                "bg-slate-950",
-                "text-white",
-            ];
-
-            const inactiveClasses = [
-                "text-slate-600",
-            ];
-
-            connectionTab.classList.remove(
-                ...activeClasses,
-                ...inactiveClasses,
-            );
-
-            bulkTab.classList.remove(
-                ...activeClasses,
-                ...inactiveClasses,
-            );
-
-            if (tab === "bulk") {
-
-                connectionPanel.classList.add("hidden");
-                bulkPanel.classList.remove("hidden");
-
-                bulkTab.classList.add(
-                    ...activeClasses
-                );
-
-                connectionTab.classList.add(
-                    ...inactiveClasses
-                );
-
-                if (!contactsLoaded) {
-                    loadContacts();
-                }
-
-                return;
-            }
-
-            bulkPanel.classList.add("hidden");
-            connectionPanel.classList.remove("hidden");
-
-            connectionTab.classList.add(
-                ...activeClasses
-            );
-
-            bulkTab.classList.add(
-                ...inactiveClasses
-            );
-        }
-
-
-        connectionTab.addEventListener(
-            "click",
-            () => activateTab("connection")
-        );
-
-        bulkTab.addEventListener(
-            "click",
-            () => activateTab("bulk")
-        );
-
-        const selectedContacts = new Map();
-
-        let currentContacts = [];
-        let currentPage = 1;
-        let totalContacts = 0;
-        const pageLimit = 25;
-
-
-        const contactsList = document.getElementById(
-            "contacts-list"
-        );
-
-        const contactsLoading = document.getElementById(
-            "contacts-loading"
-        );
-
-        const contactsEmpty = document.getElementById(
-            "contacts-empty"
-        );
-
-        const selectedCount = document.getElementById(
-            "selected-count"
-        );
-
-        const selectAll = document.getElementById(
-            "select-all"
-        );
-
-        const continueCampaign = document.getElementById(
-            "continue-campaign"
-        );
-
-        const contactSearch = document.getElementById(
-            "contact-search"
-        );
-
-        const previousPage = document.getElementById(
-            "previous-page"
-        );
-
-        const nextPage = document.getElementById(
-            "next-page"
-        );
-
-
-        function updateSelectionState() {
-
-            selectedCount.textContent =
-                selectedContacts.size;
-
-            continueCampaign.disabled =
-                selectedContacts.size === 0;
-
-            const selectableContacts =
-                currentContacts.filter(
-                    contact => contact.phone
-                );
-
-            selectAll.checked =
-                selectableContacts.length > 0
-                && selectableContacts.every(
-                    contact =>
-                        selectedContacts.has(
-                            contact.id
-                        )
-                );
-        }
-
-        function renderContacts() {
-
-            contactsList.innerHTML = "";
-
-            contactsEmpty.classList.toggle(
-                "hidden",
-                currentContacts.length > 0
-            );
-
-            for (const contact of currentContacts) {
-
-                const row = document.createElement("label");
-
-                row.className =
-                    "flex items-center gap-4 px-6 py-4 transition hover:bg-slate-50 sm:px-8";
-
-
-                const checkbox = document.createElement(
-                    "input"
-                );
-
-                checkbox.type = "checkbox";
-
-                checkbox.className =
-                    "h-4 w-4 shrink-0 rounded border-slate-300";
-
-                checkbox.disabled = !contact.phone;
-
-                checkbox.checked =
-                    selectedContacts.has(
-                        contact.id
-                    );
-
-
-                const content = document.createElement(
-                    "div"
-                );
-
-                content.className =
-                    "min-w-0 flex-1";
-
-
-                const name = document.createElement(
-                    "p"
-                );
-
-                name.className =
-                    "truncate text-sm font-semibold text-slate-900";
-
-                name.textContent =
-                    contact.name
-                    || contact.email
-                    || contact.phone
-                    || "Contact sans nom";
-
-
-                const details = document.createElement(
-                    "p"
-                );
-
-                details.className =
-                    "mt-1 truncate text-xs text-slate-500";
-
-
-                if (contact.phone) {
-
-                    details.textContent = [
-                        contact.phone,
-                        contact.email,
-                    ]
-                        .filter(Boolean)
-                        .join(" • ");
-
-                } else {
-
-                    details.textContent =
-                        "Aucun numéro WhatsApp disponible";
-
-                    details.classList.add(
-                        "text-amber-600"
-                    );
-                }
-
-
-                content.appendChild(name);
-                content.appendChild(details);
-
-                row.appendChild(checkbox);
-                row.appendChild(content);
-
-
-                checkbox.addEventListener(
-                    "change",
-                    () => {
-
-                        if (checkbox.checked) {
-
-                            selectedContacts.set(
-                                contact.id,
-                                contact
-                            );
-
-                        } else {
-
-                            selectedContacts.delete(
-                                contact.id
-                            );
-                        }
-
-                        updateSelectionState();
-                    }
-                );
-
-
-                contactsList.appendChild(row);
+              selectedContacts.delete(contact.id);
             }
 
             updateSelectionState();
+          });
+
+          contactsList.appendChild(row);
         }
-        async function loadContacts(page = 1) {
 
-            if (!embeddedToken) {
-                return;
-            }
-
-            contactsLoading.classList.remove(
-                "hidden"
-            );
-
-            contactsList.classList.add(
-                "hidden"
-            );
-
-            contactsEmpty.classList.add(
-                "hidden"
-            );
-
-            const query =
-                contactSearch.value.trim();
-
-            const params = new URLSearchParams({
-                page: page.toString(),
-                page_limit: pageLimit.toString(),
-            });
-
-            if (query) {
-                params.set("q", query);
-            }
-
-
-            try {
-
-                const response = await fetch(
-                    `${contactsUrl}?${params.toString()}`,
-                    {
-                        headers: {
-                            "Accept": "application/json",
-                            "Authorization":
-                                `Bearer ${embeddedToken}`,
-                        },
-                        cache: "no-store",
-                    }
-                );
-
-                const data = await response.json();
-
-
-                if (response.status === 401) {
-
-                    await authenticateEmbeddedPage();
-
-                    return await loadContacts(
-                        page
-                    );
-                }
-
-
-                if (!response.ok || !data.success) {
-
-                    throw new Error(
-                        data.message
-                        || "Impossible de récupérer les contacts."
-                    );
-                }
-
-
-                currentContacts =
-                    data.contacts || [];
-
-                currentPage =
-                    data.pagination?.page || 1;
-
-                totalContacts =
-                    data.pagination?.total || 0;
-
-                contactsLoaded = true;
-
-
-                document.getElementById(
-                    "contacts-total"
-                ).textContent =
-                    `${totalContacts} contact(s)`;
-
-
-                document.getElementById(
-                    "page-number"
-                ).textContent =
-                    `Page ${currentPage}`;
-
-
-                previousPage.disabled =
-                    currentPage <= 1;
-
-
-                nextPage.disabled =
-                    currentPage * pageLimit
-                    >= totalContacts;
-
-
-                renderContacts();
-
-            } catch (error) {
-
-                showError(
-                    error.message
-                    || "Erreur lors du chargement des contacts."
-                );
-
-            } finally {
-
-                contactsLoading.classList.add(
-                    "hidden"
-                );
-
-                contactsList.classList.remove(
-                    "hidden"
-                );
-            }
+        updateSelectionState();
+      }
+      async function loadContacts(page = 1) {
+        if (!embeddedToken) {
+          return;
         }
-        document.getElementById(
-            "search-button"
-        ).addEventListener(
-            "click",
-            () => loadContacts(1)
+
+        contactsLoading.classList.remove("hidden");
+
+        contactsList.classList.add("hidden");
+
+        contactsEmpty.classList.add("hidden");
+
+        const query = contactSearch.value.trim();
+
+        const params = new URLSearchParams({
+          page: page.toString(),
+          page_limit: pageLimit.toString(),
+        });
+
+        if (query) {
+          params.set("q", query);
+        }
+
+        try {
+          const response = await fetch(`${contactsUrl}?${params.toString()}`, {
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${embeddedToken}`,
+            },
+            cache: "no-store",
+          });
+
+          const data = await response.json();
+
+          if (response.status === 401) {
+            await authenticateEmbeddedPage();
+
+            return await loadContacts(page);
+          }
+
+          if (!response.ok || !data.success) {
+            throw new Error(
+              data.message || "Impossible de récupérer les contacts.",
+            );
+          }
+
+          currentContacts = data.contacts || [];
+
+          currentPage = data.pagination?.page || 1;
+
+          totalContacts = data.pagination?.total || 0;
+
+          contactsLoaded = true;
+
+          document.getElementById("contacts-total").textContent =
+            `${totalContacts} contact(s)`;
+
+          document.getElementById("page-number").textContent =
+            `Page ${currentPage}`;
+
+          previousPage.disabled = currentPage <= 1;
+
+          nextPage.disabled = currentPage * pageLimit >= totalContacts;
+
+          renderContacts();
+        } catch (error) {
+          showError(error.message || "Erreur lors du chargement des contacts.");
+        } finally {
+          contactsLoading.classList.add("hidden");
+
+          contactsList.classList.remove("hidden");
+        }
+      }
+      document
+        .getElementById("search-button")
+        .addEventListener("click", () => loadContacts(1));
+
+      contactSearch.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          loadContacts(1);
+        }
+      });
+
+      previousPage.addEventListener("click", () => {
+        if (currentPage > 1) {
+          loadContacts(currentPage - 1);
+        }
+      });
+
+      nextPage.addEventListener("click", () => {
+        loadContacts(currentPage + 1);
+      });
+      selectAll.addEventListener("change", () => {
+        for (const contact of currentContacts) {
+          if (!contact.phone) {
+            continue;
+          }
+
+          if (selectAll.checked) {
+            selectedContacts.set(contact.id, contact);
+          } else {
+            selectedContacts.delete(contact.id);
+          }
+        }
+
+        renderContacts();
+      });
+      continueCampaign.addEventListener("click", () => {
+        console.log(
+          "Selected contacts:",
+          Array.from(selectedContacts.values()),
         );
 
-
-        contactSearch.addEventListener(
-            "keydown",
-            event => {
-
-                if (event.key === "Enter") {
-                    loadContacts(1);
-                }
-            }
-        );
-
-
-        previousPage.addEventListener(
-            "click",
-            () => {
-
-                if (currentPage > 1) {
-                    loadContacts(
-                        currentPage - 1
-                    );
-                }
-            }
-        );
-
-
-        nextPage.addEventListener(
-            "click",
-            () => {
-
-                loadContacts(
-                    currentPage + 1
-                );
-            }
-        );
-        selectAll.addEventListener(
-            "change",
-            () => {
-
-                for (const contact of currentContacts) {
-
-                    if (!contact.phone) {
-                        continue;
-                    }
-
-                    if (selectAll.checked) {
-
-                        selectedContacts.set(
-                            contact.id,
-                            contact
-                        );
-
-                    } else {
-
-                        selectedContacts.delete(
-                            contact.id
-                        );
-                    }
-                }
-
-                renderContacts();
-            }
-        );
-        continueCampaign.addEventListener(
-            "click",
-            () => {
-
-                console.log(
-                    "Selected contacts:",
-                    Array.from(
-                        selectedContacts.values()
-                    )
-                );
-
-                alert(
-                    `${selectedContacts.size} contact(s) sélectionné(s).`
-                );
-            }
-        );
-        initializePage();
+        alert(`${selectedContacts.size} contact(s) sélectionné(s).`);
+      });
+      initializePage();
     </script>
 
-
-<script>
-/* ================================================================
+    <script>
+      /* ================================================================
    EVOLUTION MESSAGING - BULK CAMPAIGNS UI
    Complète la Custom Page existante avec :
    - composition de campagne
@@ -1270,44 +1042,52 @@
    - historique des campagnes
    ================================================================ */
 
-// Le fichier d'origine appelle déjà loadContacts(). Cette propriété globale
-// lui fournit l'URL même si elle n'était pas encore déclarée dans son script.
-window.contactsUrl = "{% url 'ghl:embedded-contacts' %}";
+      // Le fichier d'origine appelle déjà loadContacts(). Cette propriété globale
+      // lui fournit l'URL même si elle n'était pas encore déclarée dans son script.
+      window.contactsUrl = "{% url 'ghl:embedded-contacts' %}";
 
-const EM_CREATE_CAMPAIGN_URL = "{% url 'messaging:create-campaign-draft' %}";
-const EM_CAMPAIGNS_LIST_URL = "/api/messaging/campaigns/";
-const emValidateUrl = id => `/api/messaging/campaigns/${id}/validate/`;
-const emStartUrl = id => `/api/messaging/campaigns/${id}/start/`;
-const emStatusUrl = id => `/api/messaging/campaigns/${id}/status/`;
+      const EM_CREATE_CAMPAIGN_URL =
+        "{% url 'messaging:create-campaign-draft' %}";
+      const EM_CAMPAIGNS_LIST_URL = "/api/messaging/campaigns/";
+      const emValidateUrl = (id) => `/api/messaging/campaigns/${id}/validate/`;
+      const emStartUrl = (id) => `/api/messaging/campaigns/${id}/start/`;
+      const emStatusUrl = (id) => `/api/messaging/campaigns/${id}/status/`;
+      const emRelaunchUrl = (id) =>
+        `/api/messaging/campaigns/${id}/relaunch/`;
 
-let emCurrentCampaignId = null;
-let emCampaignPollTimer = null;
-let emDetailCampaignId = null;
-let emDetailPollTimer = null;
+      let emCurrentCampaignId = null;
+      let emCampaignPollTimer = null;
+      let emDetailCampaignId = null;
+      let emDetailPollTimer = null;
 
-const emConnectionPanel = document.getElementById("connection-panel");
-const emBulkPanel = document.getElementById("bulk-panel");
-const emConnectionTab = document.getElementById("connection-tab");
-const emBulkTab = document.getElementById("bulk-tab");
-const emRefreshButton = document.getElementById("refresh-button");
+      const emConnectionPanel = document.getElementById("connection-panel");
+      const emBulkPanel = document.getElementById("bulk-panel");
+      const emConnectionTab = document.getElementById("connection-tab");
+      const emBulkTab = document.getElementById("bulk-tab");
+      const emRefreshButton = document.getElementById("refresh-button");
 
-// Le premier fichier fourni avait bulk-panel à l'intérieur de connection-panel.
-// On le replace automatiquement comme panneau frère.
-if (emBulkPanel && emConnectionPanel && emBulkPanel.parentElement === emConnectionPanel) {
-    emConnectionPanel.parentElement.insertBefore(
-        emBulkPanel,
-        emConnectionPanel.nextSibling
-    );
-}
+      // Le premier fichier fourni avait bulk-panel à l'intérieur de connection-panel.
+      // On le replace automatiquement comme panneau frère.
+      if (
+        emBulkPanel &&
+        emConnectionPanel &&
+        emBulkPanel.parentElement === emConnectionPanel
+      ) {
+        emConnectionPanel.parentElement.insertBefore(
+          emBulkPanel,
+          emConnectionPanel.nextSibling,
+        );
+      }
 
-// -----------------------------------------------------------------
-// Barre de succès
-// -----------------------------------------------------------------
-const emErrorContainer = document.getElementById("error-container");
-const emSuccessContainer = document.createElement("div");
-emSuccessContainer.id = "success-container";
-emSuccessContainer.className = "mb-6 hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800";
-emSuccessContainer.innerHTML = `
+      // -----------------------------------------------------------------
+      // Barre de succès
+      // -----------------------------------------------------------------
+      const emErrorContainer = document.getElementById("error-container");
+      const emSuccessContainer = document.createElement("div");
+      emSuccessContainer.id = "success-container";
+      emSuccessContainer.className =
+        "mb-6 hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800";
+      emSuccessContainer.innerHTML = `
     <div class="flex items-start justify-between gap-4">
         <div>
             <p class="font-bold">Opération réussie</p>
@@ -1315,180 +1095,212 @@ emSuccessContainer.innerHTML = `
         </div>
         <button id="close-success" type="button" class="rounded-lg px-2 py-1 font-bold hover:bg-emerald-100">✕</button>
     </div>`;
-emErrorContainer.insertAdjacentElement("afterend", emSuccessContainer);
+      emErrorContainer.insertAdjacentElement("afterend", emSuccessContainer);
 
-document.getElementById("close-success").addEventListener("click", () => {
-    emSuccessContainer.classList.add("hidden");
-});
+      document.getElementById("close-success").addEventListener("click", () => {
+        emSuccessContainer.classList.add("hidden");
+      });
 
-function emSuccess(message) {
-    document.getElementById("success-message").textContent = message;
-    emSuccessContainer.classList.remove("hidden");
-}
+      function emSuccess(message) {
+        document.getElementById("success-message").textContent = message;
+        emSuccessContainer.classList.remove("hidden");
+      }
 
-function emHideSuccess() {
-    emSuccessContainer.classList.add("hidden");
-}
+      function emHideSuccess() {
+        emSuccessContainer.classList.add("hidden");
+      }
 
-function emFormatDate(value) {
-    if (!value) return "—";
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString("fr-FR");
-}
+      function emFormatDate(value) {
+        if (!value) return "—";
+        const date = new Date(value);
+        return Number.isNaN(date.getTime())
+          ? "—"
+          : date.toLocaleString("fr-FR");
+      }
 
-function emStatusLabel(status) {
-    return ({
-        draft: "Brouillon",
-        queued: "En attente",
-        running: "En cours",
-        completed: "Terminée",
-        partial: "Partielle",
-        failed: "Échec",
-        cancelled: "Annulée",
-    })[status] || status || "—";
-}
+      function emStatusLabel(status) {
+        return (
+          {
+            draft: "Brouillon",
+            queued: "En attente",
+            running: "En cours",
+            completed: "Terminée",
+            partial: "Partielle",
+            failed: "Échec",
+            cancelled: "Annulée",
+          }[status] ||
+          status ||
+          "—"
+        );
+      }
 
-function emStatusClasses(status) {
-    return ({
-        draft: "bg-slate-100 text-slate-700",
-        queued: "bg-amber-100 text-amber-700",
-        running: "bg-blue-100 text-blue-700",
-        completed: "bg-emerald-100 text-emerald-700",
-        partial: "bg-orange-100 text-orange-700",
-        failed: "bg-red-100 text-red-700",
-        cancelled: "bg-slate-200 text-slate-600",
-    })[status] || "bg-slate-100 text-slate-700";
-}
+      function emStatusClasses(status) {
+        return (
+          {
+            draft: "bg-slate-100 text-slate-700",
+            queued: "bg-amber-100 text-amber-700",
+            running: "bg-blue-100 text-blue-700",
+            completed: "bg-emerald-100 text-emerald-700",
+            partial: "bg-orange-100 text-orange-700",
+            failed: "bg-red-100 text-red-700",
+            cancelled: "bg-slate-200 text-slate-600",
+          }[status] || "bg-slate-100 text-slate-700"
+        );
+      }
 
-function emSetBadge(element, status) {
-    element.className = `inline-flex w-fit rounded-full px-3 py-1.5 text-sm font-bold ${emStatusClasses(status)}`;
-    element.textContent = emStatusLabel(status);
-}
+      function emSetBadge(element, status) {
+        element.className = `inline-flex w-fit rounded-full px-3 py-1.5 text-sm font-bold ${emStatusClasses(status)}`;
+        element.textContent = emStatusLabel(status);
+      }
 
-function emSetLoading(button, active, busyText, normalText) {
-    button.disabled = active;
-    button.textContent = active ? busyText : normalText;
-}
+      function emSetLoading(button, active, busyText, normalText) {
+        button.disabled = active;
+        button.textContent = active ? busyText : normalText;
+      }
 
-async function emApi(url, options = {}, retry = true) {
-    const headers = {
-        Accept: "application/json",
-        ...(options.headers || {}),
-        Authorization: `Bearer ${embeddedToken}`,
-    };
+      async function emApi(url, options = {}, retry = true) {
+        const headers = {
+          Accept: "application/json",
+          ...(options.headers || {}),
+          Authorization: `Bearer ${embeddedToken}`,
+        };
 
-    let response = await fetch(url, {
-        ...options,
-        headers,
-        cache: "no-store",
-    });
+        let response = await fetch(url, {
+          ...options,
+          headers,
+          cache: "no-store",
+        });
 
-    if (response.status === 401 && retry) {
-        embeddedToken = "";
-        await authenticateEmbeddedPage();
-        response = await fetch(url, {
+        if (response.status === 401 && retry) {
+          embeddedToken = "";
+          await authenticateEmbeddedPage();
+          response = await fetch(url, {
             ...options,
             headers: {
-                ...headers,
-                Authorization: `Bearer ${embeddedToken}`,
+              ...headers,
+              Authorization: `Bearer ${embeddedToken}`,
             },
             cache: "no-store",
+          });
+        }
+
+        let data = null;
+        try {
+          data = await response.json();
+        } catch (_) {}
+
+        if (!response.ok || data?.success === false) {
+          const error = new Error(
+            data?.message || `Erreur HTTP ${response.status}`,
+          );
+          error.status = response.status;
+          error.data = data;
+          throw error;
+        }
+
+        return data;
+      }
+
+      function emTrackingKey() {
+        const location =
+          document.getElementById("location-id")?.textContent || "unknown";
+        return `evolution-messaging-campaigns:${location}`;
+      }
+
+      function emTrackedIds() {
+        try {
+          const value = JSON.parse(
+            localStorage.getItem(emTrackingKey()) || "[]",
+          );
+          return Array.isArray(value)
+            ? value.map(Number).filter(Number.isInteger)
+            : [];
+        } catch (_) {
+          return [];
+        }
+      }
+
+      function emRememberCampaign(id) {
+        if (!id) return;
+        const ids = emTrackedIds().filter((value) => value !== Number(id));
+        ids.unshift(Number(id));
+        localStorage.setItem(
+          emTrackingKey(),
+          JSON.stringify(ids.slice(0, 100)),
+        );
+      }
+
+      // -----------------------------------------------------------------
+      // Ajouter un troisième onglet : Campagnes
+      // -----------------------------------------------------------------
+      const emCampaignsTab = document.createElement("button");
+      emCampaignsTab.id = "campaigns-tab";
+      emCampaignsTab.type = "button";
+      emCampaignsTab.className =
+        "rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100";
+      emCampaignsTab.textContent = "Campagnes";
+      emBulkTab.insertAdjacentElement("afterend", emCampaignsTab);
+
+      const emCampaignsPanel = document.createElement("div");
+      emCampaignsPanel.id = "campaigns-panel";
+      emCampaignsPanel.className = "hidden space-y-6";
+      emBulkPanel.insertAdjacentElement("afterend", emCampaignsPanel);
+
+      function emSetTabVisual(active) {
+        [emConnectionTab, emBulkTab, emCampaignsTab].forEach((button) => {
+          const selected = button === active;
+          button.classList.toggle("bg-slate-950", selected);
+          button.classList.toggle("text-white", selected);
+          button.classList.toggle("text-slate-600", !selected);
         });
-    }
+      }
 
-    let data = null;
-    try { data = await response.json(); } catch (_) {}
+      function emSetHeader(title, subtitle) {
+        const h1 = document.querySelector("header h1");
+        const p = h1?.parentElement?.querySelector("p.mt-2");
+        if (h1) h1.textContent = title;
+        if (p) p.textContent = subtitle;
+      }
 
-    if (!response.ok || data?.success === false) {
-        const error = new Error(data?.message || `Erreur HTTP ${response.status}`);
-        error.status = response.status;
-        error.data = data;
-        throw error;
-    }
+      emConnectionTab.addEventListener("click", () => {
+        emCampaignsPanel.classList.add("hidden");
+        emSetTabVisual(emConnectionTab);
+        emRefreshButton.classList.remove("hidden");
+        emSetHeader(
+          "Connexion WhatsApp",
+          "Connectez le numéro WhatsApp de votre sous-compte HighLevel.",
+        );
+      });
 
-    return data;
-}
+      emBulkTab.addEventListener("click", () => {
+        emCampaignsPanel.classList.add("hidden");
+        emSetTabVisual(emBulkTab);
+        emRefreshButton.classList.add("hidden");
+        emSetHeader(
+          "Bulk Messages",
+          "Créez, vérifiez et envoyez vos campagnes WhatsApp depuis HighLevel.",
+        );
+      });
 
-function emTrackingKey() {
-    const location = document.getElementById("location-id")?.textContent || "unknown";
-    return `evolution-messaging-campaigns:${location}`;
-}
+      emCampaignsTab.addEventListener("click", () => {
+        emConnectionPanel.classList.add("hidden");
+        emBulkPanel.classList.add("hidden");
+        emCampaignsPanel.classList.remove("hidden");
+        emSetTabVisual(emCampaignsTab);
+        emRefreshButton.classList.add("hidden");
+        emSetHeader(
+          "Campagnes",
+          "Suivez l'historique et la progression de vos campagnes WhatsApp.",
+        );
+        emLoadCampaigns();
+      });
 
-function emTrackedIds() {
-    try {
-        const value = JSON.parse(localStorage.getItem(emTrackingKey()) || "[]");
-        return Array.isArray(value) ? value.map(Number).filter(Number.isInteger) : [];
-    } catch (_) {
-        return [];
-    }
-}
-
-function emRememberCampaign(id) {
-    if (!id) return;
-    const ids = emTrackedIds().filter(value => value !== Number(id));
-    ids.unshift(Number(id));
-    localStorage.setItem(emTrackingKey(), JSON.stringify(ids.slice(0, 100)));
-}
-
-// -----------------------------------------------------------------
-// Ajouter un troisième onglet : Campagnes
-// -----------------------------------------------------------------
-const emCampaignsTab = document.createElement("button");
-emCampaignsTab.id = "campaigns-tab";
-emCampaignsTab.type = "button";
-emCampaignsTab.className = "rounded-xl px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100";
-emCampaignsTab.textContent = "Campagnes";
-emBulkTab.insertAdjacentElement("afterend", emCampaignsTab);
-
-const emCampaignsPanel = document.createElement("div");
-emCampaignsPanel.id = "campaigns-panel";
-emCampaignsPanel.className = "hidden space-y-6";
-emBulkPanel.insertAdjacentElement("afterend", emCampaignsPanel);
-
-function emSetTabVisual(active) {
-    [emConnectionTab, emBulkTab, emCampaignsTab].forEach(button => {
-        const selected = button === active;
-        button.classList.toggle("bg-slate-950", selected);
-        button.classList.toggle("text-white", selected);
-        button.classList.toggle("text-slate-600", !selected);
-    });
-}
-
-function emSetHeader(title, subtitle) {
-    const h1 = document.querySelector("header h1");
-    const p = h1?.parentElement?.querySelector("p.mt-2");
-    if (h1) h1.textContent = title;
-    if (p) p.textContent = subtitle;
-}
-
-emConnectionTab.addEventListener("click", () => {
-    emCampaignsPanel.classList.add("hidden");
-    emSetTabVisual(emConnectionTab);
-    emRefreshButton.classList.remove("hidden");
-    emSetHeader("Connexion WhatsApp", "Connectez le numéro WhatsApp de votre sous-compte HighLevel.");
-});
-
-emBulkTab.addEventListener("click", () => {
-    emCampaignsPanel.classList.add("hidden");
-    emSetTabVisual(emBulkTab);
-    emRefreshButton.classList.add("hidden");
-    emSetHeader("Bulk Messages", "Créez, vérifiez et envoyez vos campagnes WhatsApp depuis HighLevel.");
-});
-
-emCampaignsTab.addEventListener("click", () => {
-    emConnectionPanel.classList.add("hidden");
-    emBulkPanel.classList.add("hidden");
-    emCampaignsPanel.classList.remove("hidden");
-    emSetTabVisual(emCampaignsTab);
-    emRefreshButton.classList.add("hidden");
-    emSetHeader("Campagnes", "Suivez l'historique et la progression de vos campagnes WhatsApp.");
-    emLoadCampaigns();
-});
-
-// -----------------------------------------------------------------
-// UI composition / validation / progression
-// -----------------------------------------------------------------
-emBulkPanel.insertAdjacentHTML("beforeend", `
+      // -----------------------------------------------------------------
+      // UI composition / validation / progression
+      // -----------------------------------------------------------------
+      emBulkPanel.insertAdjacentHTML(
+        "beforeend",
+        `
     <section id="campaign-compose" class="mt-6 hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -1512,6 +1324,45 @@ emBulkPanel.insertAdjacentHTML("beforeend", `
                         <span id="campaign-message-count" class="text-xs text-slate-400">0 / 4000</span>
                     </div>
                     <textarea id="campaign-message" rows="8" maxlength="4000" placeholder="Bonjour {{firstName}}, nous avons une nouvelle offre..." class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-slate-400"></textarea>
+                    <div class="mt-6">
+
+    <label class="text-sm font-semibold">
+        Images ou documents
+    </label>
+
+    <p class="mt-1 text-xs text-slate-500">
+        Jusqu'à 5 fichiers, 5 Mo maximum par fichier.
+    </p>
+
+    <input
+        id="campaign-attachments"
+        type="file"
+        multiple
+        accept="
+            image/jpeg,
+            image/png,
+            image/gif,
+            image/webp,
+            application/pdf,
+            .doc,
+            .docx,
+            .xls,
+            .xlsx,
+            .ppt,
+            .pptx,
+            .txt,
+            .csv,
+            .zip
+        "
+        class="mt-3 block w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm"
+    >
+
+    <div
+        id="attachment-preview"
+        class="mt-3 space-y-2"
+    ></div>
+
+</div>
                     <div class="mt-3 flex flex-wrap gap-2">
                         <button type="button" data-var="{{firstName}}" class="em-var rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold">+ Prénom</button>
                         <button type="button" data-var="{{lastName}}" class="em-var rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold">+ Nom</button>
@@ -1592,12 +1443,20 @@ emBulkPanel.insertAdjacentHTML("beforeend", `
             <button id="new-campaign" type="button" class="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white">Nouvelle campagne</button>
         </div>
     </section>
-`);
+`,
+      );
 
-// -----------------------------------------------------------------
-// Historique des campagnes
-// -----------------------------------------------------------------
-emCampaignsPanel.innerHTML = `
+      // Les éléments d'upload sont créés dans le HTML dynamique ci-dessus.
+      // On les récupère seulement maintenant, une fois présents dans le DOM.
+      const campaignAttachments = document.getElementById(
+        "campaign-attachments",
+      );
+      const attachmentPreview = document.getElementById("attachment-preview");
+
+      // -----------------------------------------------------------------
+      // Historique des campagnes
+      // -----------------------------------------------------------------
+      emCampaignsPanel.innerHTML = `
     <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div class="flex flex-col gap-4 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
             <div><h2 class="text-2xl font-bold">Historique des campagnes</h2><p class="mt-1 text-sm text-slate-500">Consultez les campagnes du sous-compte et leur état d'envoi.</p></div>
@@ -1611,7 +1470,7 @@ emCampaignsPanel.innerHTML = `
     <section id="campaign-detail" class="hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div><p class="text-xs font-bold uppercase text-emerald-600">Détails</p><h2 id="detail-name" class="mt-1 text-2xl font-bold">—</h2><p class="mt-1 text-sm text-slate-500">Campagne #<span id="detail-id">—</span></p></div>
-            <div class="flex flex-wrap gap-2"><button id="detail-validate" type="button" class="hidden rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white">Vérifier WhatsApp</button><button id="detail-start" type="button" class="hidden rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white">Démarrer</button><button id="detail-refresh" type="button" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold">Actualiser</button></div>
+            <div class="flex flex-wrap gap-2"><button id="detail-validate" type="button" class="hidden rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white">Vérifier WhatsApp</button><button id="detail-start" type="button" class="hidden rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white">Démarrer</button><button id="detail-relaunch" type="button" class="hidden rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-700">Relancer</button><button id="detail-refresh" type="button" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold">Actualiser</button></div>
         </div>
         <div class="mt-5"><span id="detail-status" class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold">—</span></div>
         <div class="mt-6 h-3 overflow-hidden rounded-full bg-slate-100"><div id="detail-progress-bar" class="h-full rounded-full bg-emerald-500" style="width:0%"></div></div><p id="detail-progress-label" class="mt-2 text-right text-xs text-slate-500">0 / 0</p>
@@ -1626,285 +1485,824 @@ emCampaignsPanel.innerHTML = `
         <div class="mt-6 grid gap-4 sm:grid-cols-3"><div class="rounded-2xl border border-slate-200 p-4"><p class="text-xs uppercase text-slate-400">Total</p><p id="detail-total" class="mt-1 font-medium">0</p></div><div class="rounded-2xl border border-slate-200 p-4"><p class="text-xs uppercase text-slate-400">Début</p><p id="detail-started" class="mt-1 font-medium">—</p></div><div class="rounded-2xl border border-slate-200 p-4"><p class="text-xs uppercase text-slate-400">Fin</p><p id="detail-completed" class="mt-1 font-medium">—</p></div></div>
     </section>`;
 
-// -----------------------------------------------------------------
-// Intercepter l'ancien bouton Continue pour éviter l'ancien alert()
-// -----------------------------------------------------------------
-document.addEventListener("click", event => {
-    if (event.target.closest("#continue-campaign")) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        if (!selectedContacts.size) return;
-        document.getElementById("compose-recipient-count").textContent = selectedContacts.size;
-        document.getElementById("campaign-compose").classList.remove("hidden");
-        document.getElementById("campaign-compose").scrollIntoView({behavior:"smooth", block:"start"});
-    }
-}, true);
+      // -----------------------------------------------------------------
+      // Modal de relance d'une campagne
+      // -----------------------------------------------------------------
+      document.body.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div id="relaunch-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/50 p-4">
+          <div class="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-violet-600">Relance</p>
+                <h2 class="mt-1 text-2xl font-bold text-slate-950">Relancer la campagne</h2>
+                <p id="relaunch-source-label" class="mt-1 text-sm text-slate-500">—</p>
+              </div>
+              <button id="relaunch-close" type="button" class="rounded-xl px-3 py-2 text-slate-500 hover:bg-slate-100">✕</button>
+            </div>
 
-document.getElementById("back-to-contacts").addEventListener("click", () => {
-    emBulkPanel.scrollIntoView({behavior:"smooth", block:"start"});
-});
+            <div class="mt-6">
+              <label class="text-sm font-semibold">Nom de la nouvelle campagne</label>
+              <input id="relaunch-name" type="text" maxlength="255" class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-slate-400">
+            </div>
 
-const emCampaignMessage = document.getElementById("campaign-message");
-emCampaignMessage.addEventListener("input", () => {
-    document.getElementById("campaign-message-count").textContent = `${emCampaignMessage.value.length} / 4000`;
-});
+            <div class="mt-6 space-y-3">
+              <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 p-4 hover:bg-slate-50">
+                <input id="relaunch-mode-same" type="radio" name="relaunch-mode" value="same" checked class="mt-1">
+                <span>
+                  <span class="block text-sm font-bold text-slate-900">Utiliser le même message</span>
+                  <span class="mt-1 block text-xs text-slate-500">Le texte de la campagne d'origine sera réutilisé.</span>
+                </span>
+              </label>
 
-document.querySelectorAll(".em-var").forEach(button => {
-    button.addEventListener("click", () => {
-        const variable = button.dataset.var || "";
-        const start = emCampaignMessage.selectionStart;
-        const end = emCampaignMessage.selectionEnd;
-        emCampaignMessage.value = emCampaignMessage.value.slice(0,start) + variable + emCampaignMessage.value.slice(end);
-        const cursor = start + variable.length;
-        emCampaignMessage.focus();
-        emCampaignMessage.setSelectionRange(cursor,cursor);
-        emCampaignMessage.dispatchEvent(new Event("input"));
-    });
-});
+              <label class="flex cursor-pointer items-start gap-3 rounded-2xl border border-slate-200 p-4 hover:bg-slate-50">
+                <input id="relaunch-mode-custom" type="radio" name="relaunch-mode" value="custom" class="mt-1">
+                <span>
+                  <span class="block text-sm font-bold text-slate-900">Utiliser un nouveau message</span>
+                  <span class="mt-1 block text-xs text-slate-500">Écrivez un nouveau texte pour cette relance.</span>
+                </span>
+              </label>
+            </div>
 
-// -----------------------------------------------------------------
-// Créer le brouillon
-// -----------------------------------------------------------------
-const emCreateButton = document.getElementById("create-campaign");
-emCreateButton.addEventListener("click", async () => {
-    hideError(); emHideSuccess();
-    const name = document.getElementById("campaign-name").value.trim();
-    const message = emCampaignMessage.value.trim();
-    const consent = document.getElementById("campaign-consent").checked;
-    const ids = Array.from(selectedContacts.keys());
+            <div id="relaunch-custom-message-wrap" class="mt-5 hidden">
+              <div class="flex items-center justify-between gap-3">
+                <label class="text-sm font-semibold">Nouveau message WhatsApp</label>
+                <span id="relaunch-message-count" class="text-xs text-slate-400">0 / 4000</span>
+              </div>
+              <textarea id="relaunch-message" rows="7" maxlength="4000" placeholder="Bonjour {{firstName}}, voici notre nouveau message..." class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-slate-400"></textarea>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <button type="button" data-relaunch-var="{{firstName}}" class="relaunch-var rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold">+ Prénom</button>
+                <button type="button" data-relaunch-var="{{lastName}}" class="relaunch-var rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold">+ Nom</button>
+                <button type="button" data-relaunch-var="{{email}}" class="relaunch-var rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold">+ Email</button>
+                <button type="button" data-relaunch-var="{{phone}}" class="relaunch-var rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold">+ Téléphone</button>
+              </div>
+            </div>
 
-    if (!name) return showError("Donnez un nom à la campagne.");
-    if (!message) return showError("Écrivez le message WhatsApp.");
-    if (!consent) return showError("Confirmez que les contacts sont autorisés à recevoir cette communication.");
-    if (!ids.length) return showError("Sélectionnez au moins un contact.");
+            <label class="mt-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4">
+              <input id="relaunch-copy-attachments" type="checkbox" checked class="mt-1">
+              <span>
+                <span class="block text-sm font-bold text-blue-950">Réutiliser les pièces jointes</span>
+                <span class="mt-1 block text-xs text-blue-700">Les images et documents de la campagne d'origine seront associés à la relance.</span>
+              </span>
+            </label>
 
-    emSetLoading(emCreateButton,true,"Création…","Créer le brouillon");
-    try {
-        const data = await emApi(EM_CREATE_CAMPAIGN_URL, {
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({name, message, contact_ids:ids, confirmed_opt_in:consent}),
+            <div class="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button id="relaunch-cancel" type="button" class="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold hover:bg-slate-50">Annuler</button>
+              <button id="relaunch-submit" type="button" class="rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white hover:bg-violet-700 disabled:opacity-50">Créer la relance</button>
+            </div>
+          </div>
+        </div>
+        `,
+      );
+
+      const emRelaunchModal = document.getElementById("relaunch-modal");
+      const emRelaunchName = document.getElementById("relaunch-name");
+      const emRelaunchMessage = document.getElementById("relaunch-message");
+      const emRelaunchCustomWrap = document.getElementById(
+        "relaunch-custom-message-wrap",
+      );
+      const emRelaunchSubmit = document.getElementById("relaunch-submit");
+      let emRelaunchCampaignId = null;
+      let emRelaunchCampaignName = "";
+
+      function emOpenRelaunch(id, name) {
+        emRelaunchCampaignId = id;
+        emRelaunchCampaignName = name || `Campagne #${id}`;
+        document.getElementById("relaunch-source-label").textContent =
+          `Source : ${emRelaunchCampaignName} (#${id})`;
+        emRelaunchName.value = `${emRelaunchCampaignName} - Relance`;
+        document.getElementById("relaunch-mode-same").checked = true;
+        document.getElementById("relaunch-mode-custom").checked = false;
+        document.getElementById("relaunch-copy-attachments").checked = true;
+        emRelaunchMessage.value = "";
+        document.getElementById("relaunch-message-count").textContent = "0 / 4000";
+        emRelaunchCustomWrap.classList.add("hidden");
+        emRelaunchModal.classList.remove("hidden");
+        emRelaunchModal.classList.add("flex");
+      }
+
+      function emCloseRelaunch() {
+        emRelaunchModal.classList.add("hidden");
+        emRelaunchModal.classList.remove("flex");
+        emRelaunchCampaignId = null;
+      }
+
+      document.getElementById("relaunch-close").addEventListener("click", emCloseRelaunch);
+      document.getElementById("relaunch-cancel").addEventListener("click", emCloseRelaunch);
+      emRelaunchModal.addEventListener("click", (event) => {
+        if (event.target === emRelaunchModal) emCloseRelaunch();
+      });
+
+      document.querySelectorAll('input[name="relaunch-mode"]').forEach((radio) => {
+        radio.addEventListener("change", () => {
+          const custom = document.getElementById("relaunch-mode-custom").checked;
+          emRelaunchCustomWrap.classList.toggle("hidden", !custom);
+          if (custom) emRelaunchMessage.focus();
         });
-        emCurrentCampaignId = data.campaign.id;
-        emRememberCampaign(emCurrentCampaignId);
-        emPrepareValidation(data.campaign);
-        emSuccess(`Brouillon « ${data.campaign.name} » créé avec ${data.campaign.total_contacts} destinataire(s).`);
-    } catch(error) {
-        showError(error.message);
-    } finally {
-        emSetLoading(emCreateButton,false,"Création…","Créer le brouillon");
-    }
-});
+      });
 
-function emPrepareValidation(campaign) {
-    document.getElementById("current-campaign-id").textContent = campaign.id;
-    document.getElementById("current-campaign-name").textContent = campaign.name || `Campagne #${campaign.id}`;
-    emSetBadge(document.getElementById("current-campaign-status"), campaign.status || "draft");
-    document.getElementById("validation-total").textContent = campaign.total_contacts || 0;
-    document.getElementById("validation-valid").textContent = 0;
-    document.getElementById("validation-invalid").textContent = campaign.skipped_count || 0;
-    document.getElementById("validation-errors").textContent = 0;
-    document.getElementById("start-campaign").disabled = true;
-    document.getElementById("validate-campaign").disabled = false;
-    document.getElementById("campaign-validation").classList.remove("hidden");
-    document.getElementById("campaign-validation").scrollIntoView({behavior:"smooth",block:"start"});
-}
+      emRelaunchMessage.addEventListener("input", () => {
+        document.getElementById("relaunch-message-count").textContent =
+          `${emRelaunchMessage.value.length} / 4000`;
+      });
 
-// -----------------------------------------------------------------
-// Vérifier WhatsApp
-// -----------------------------------------------------------------
-async function emValidateCampaign(id, button, normalText="Vérifier les numéros") {
-    hideError(); emHideSuccess();
-    if (!id) return null;
-    const loading = document.getElementById("validation-loading");
-    loading.classList.remove("hidden");
-    emSetLoading(button,true,"Vérification…",normalText);
-    try {
-        const data = await emApi(emValidateUrl(id), {method:"POST"});
-        const v = data.validation || {};
-        document.getElementById("validation-total").textContent = v.total || 0;
-        document.getElementById("validation-valid").textContent = v.valid || 0;
-        document.getElementById("validation-invalid").textContent = v.invalid || 0;
-        document.getElementById("validation-errors").textContent = v.errors || 0;
-        document.getElementById("start-campaign").disabled = Number(v.valid || 0) <= 0;
-        emRememberCampaign(id);
-        emSuccess(`Vérification terminée : ${v.valid || 0} valide(s), ${v.invalid || 0} non WhatsApp, ${v.errors || 0} erreur(s).`);
-        return v;
-    } catch(error) {
-        showError(error.message);
-        return null;
-    } finally {
+      document.querySelectorAll(".relaunch-var").forEach((button) => {
+        button.addEventListener("click", () => {
+          const variable = button.dataset.relaunchVar || "";
+          const start = emRelaunchMessage.selectionStart;
+          const end = emRelaunchMessage.selectionEnd;
+          emRelaunchMessage.value =
+            emRelaunchMessage.value.slice(0, start) +
+            variable +
+            emRelaunchMessage.value.slice(end);
+          const cursor = start + variable.length;
+          emRelaunchMessage.focus();
+          emRelaunchMessage.setSelectionRange(cursor, cursor);
+          emRelaunchMessage.dispatchEvent(new Event("input"));
+        });
+      });
+
+      emRelaunchSubmit.addEventListener("click", async () => {
+        if (!emRelaunchCampaignId) return;
+        hideError();
+        emHideSuccess();
+
+        const mode = document.getElementById("relaunch-mode-custom").checked
+          ? "custom"
+          : "same";
+        const name = emRelaunchName.value.trim();
+        const message = emRelaunchMessage.value.trim();
+        const copyAttachments = document.getElementById(
+          "relaunch-copy-attachments",
+        ).checked;
+
+        if (!name) return showError("Donnez un nom à la campagne de relance.");
+        if (mode === "custom" && !message)
+          return showError("Écrivez le nouveau message de la relance.");
+
+        emSetLoading(
+          emRelaunchSubmit,
+          true,
+          "Création…",
+          "Créer la relance",
+        );
+
+        try {
+          const payload = {
+            mode,
+            name,
+            copy_attachments: copyAttachments,
+          };
+          if (mode === "custom") payload.message = message;
+
+          const data = await emApi(emRelaunchUrl(emRelaunchCampaignId), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          const newCampaign = data.campaign || {};
+          emRememberCampaign(newCampaign.id);
+          emCloseRelaunch();
+          emSuccess(
+            `Relance « ${newCampaign.name || "Campagne"} » créée. Vérifiez les numéros WhatsApp avant de la démarrer.`,
+          );
+          await emLoadCampaigns(false);
+          if (newCampaign.id) await emOpenDetail(newCampaign.id);
+        } catch (error) {
+          showError(error.message);
+        } finally {
+          emSetLoading(
+            emRelaunchSubmit,
+            false,
+            "Création…",
+            "Créer la relance",
+          );
+        }
+      });
+
+      // -----------------------------------------------------------------
+      // Intercepter l'ancien bouton Continue pour éviter l'ancien alert()
+      // -----------------------------------------------------------------
+      document.addEventListener(
+        "click",
+        (event) => {
+          if (event.target.closest("#continue-campaign")) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (!selectedContacts.size) return;
+            document.getElementById("compose-recipient-count").textContent =
+              selectedContacts.size;
+            document
+              .getElementById("campaign-compose")
+              .classList.remove("hidden");
+            document
+              .getElementById("campaign-compose")
+              .scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        },
+        true,
+      );
+
+      document
+        .getElementById("back-to-contacts")
+        .addEventListener("click", () => {
+          emBulkPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
+      const emCampaignMessage = document.getElementById("campaign-message");
+      emCampaignMessage.addEventListener("input", () => {
+        document.getElementById("campaign-message-count").textContent =
+          `${emCampaignMessage.value.length} / 4000`;
+      });
+
+      document.querySelectorAll(".em-var").forEach((button) => {
+        button.addEventListener("click", () => {
+          const variable = button.dataset.var || "";
+          const start = emCampaignMessage.selectionStart;
+          const end = emCampaignMessage.selectionEnd;
+          emCampaignMessage.value =
+            emCampaignMessage.value.slice(0, start) +
+            variable +
+            emCampaignMessage.value.slice(end);
+          const cursor = start + variable.length;
+          emCampaignMessage.focus();
+          emCampaignMessage.setSelectionRange(cursor, cursor);
+          emCampaignMessage.dispatchEvent(new Event("input"));
+        });
+      });
+
+      // -----------------------------------------------------------------
+      // Créer le brouillon
+      // -----------------------------------------------------------------
+      const emCreateButton = document.getElementById("create-campaign");
+      emCreateButton.addEventListener("click", async () => {
+        hideError();
+        emHideSuccess();
+        const name = document.getElementById("campaign-name").value.trim();
+        const message = emCampaignMessage.value.trim();
+        const consent = document.getElementById("campaign-consent").checked;
+        const ids = Array.from(selectedContacts.keys());
+
+        if (!name) return showError("Donnez un nom à la campagne.");
+        if (!message) return showError("Écrivez le message WhatsApp.");
+        if (!consent)
+          return showError(
+            "Confirmez que les contacts sont autorisés à recevoir cette communication.",
+          );
+        if (!ids.length) return showError("Sélectionnez au moins un contact.");
+
+        const files = Array.from(campaignAttachments?.files || []);
+        if (files.length > 5)
+          return showError("Maximum 5 fichiers par campagne.");
+        const oversized = files.find((file) => file.size > 5 * 1024 * 1024);
+        if (oversized)
+          return showError(`${oversized.name} dépasse la limite de 5 Mo.`);
+
+        emSetLoading(emCreateButton, true, "Création…", "Créer le brouillon");
+        try {
+          const formData = new FormData();
+          formData.append("name", name);
+          formData.append("message", message);
+          formData.append("contact_ids", JSON.stringify(ids));
+          formData.append("confirmed_opt_in", consent ? "true" : "false");
+          for (const file of files) {
+            formData.append("attachments", file);
+          }
+
+          const data = await emApi(EM_CREATE_CAMPAIGN_URL, {
+            method: "POST",
+            body: formData,
+          });
+          emCurrentCampaignId = data.campaign.id;
+          emRememberCampaign(emCurrentCampaignId);
+          emPrepareValidation(data.campaign);
+          emSuccess(
+            `Brouillon « ${data.campaign.name} » créé avec ${data.campaign.total_contacts} destinataire(s).`,
+          );
+        } catch (error) {
+          showError(error.message);
+        } finally {
+          emSetLoading(
+            emCreateButton,
+            false,
+            "Création…",
+            "Créer le brouillon",
+          );
+        }
+      });
+
+      function emPrepareValidation(campaign) {
+        document.getElementById("current-campaign-id").textContent =
+          campaign.id;
+        document.getElementById("current-campaign-name").textContent =
+          campaign.name || `Campagne #${campaign.id}`;
+        emSetBadge(
+          document.getElementById("current-campaign-status"),
+          campaign.status || "draft",
+        );
+        document.getElementById("validation-total").textContent =
+          campaign.total_contacts || 0;
+        document.getElementById("validation-valid").textContent = 0;
+        document.getElementById("validation-invalid").textContent =
+          campaign.skipped_count || 0;
+        document.getElementById("validation-errors").textContent = 0;
+        document.getElementById("start-campaign").disabled = true;
+        document.getElementById("validate-campaign").disabled = false;
+        document
+          .getElementById("campaign-validation")
+          .classList.remove("hidden");
+        document
+          .getElementById("campaign-validation")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // -----------------------------------------------------------------
+      // Vérifier WhatsApp
+      // -----------------------------------------------------------------
+      async function emValidateCampaign(
+        id,
+        button,
+        normalText = "Vérifier les numéros",
+      ) {
+        hideError();
+        emHideSuccess();
+        if (!id) return null;
+        const loading = document.getElementById("validation-loading");
+        loading.classList.remove("hidden");
+        emSetLoading(button, true, "Vérification…", normalText);
+        try {
+          const data = await emApi(emValidateUrl(id), { method: "POST" });
+          const v = data.validation || {};
+          document.getElementById("validation-total").textContent =
+            v.total || 0;
+          document.getElementById("validation-valid").textContent =
+            v.valid || 0;
+          document.getElementById("validation-invalid").textContent =
+            v.invalid || 0;
+          document.getElementById("validation-errors").textContent =
+            v.errors || 0;
+          document.getElementById("start-campaign").disabled =
+            Number(v.valid || 0) <= 0;
+          emRememberCampaign(id);
+          emSuccess(
+            `Vérification terminée : ${v.valid || 0} valide(s), ${v.invalid || 0} non WhatsApp, ${v.errors || 0} erreur(s).`,
+          );
+          return v;
+        } catch (error) {
+          showError(error.message);
+          return null;
+        } finally {
+          loading.classList.add("hidden");
+          emSetLoading(button, false, "Vérification…", normalText);
+        }
+      }
+
+      document
+        .getElementById("validate-campaign")
+        .addEventListener("click", async () => {
+          const v = await emValidateCampaign(
+            emCurrentCampaignId,
+            document.getElementById("validate-campaign"),
+          );
+          if (v) {
+            const data = await emGetStatus(emCurrentCampaignId, false).catch(
+              () => null,
+            );
+            if (data) emRenderCurrent(data);
+          }
+        });
+
+      // -----------------------------------------------------------------
+      // Démarrer
+      // -----------------------------------------------------------------
+      async function emStartCampaign(
+        id,
+        button,
+        normalText = "Démarrer la campagne",
+      ) {
+        hideError();
+        emHideSuccess();
+        if (!id) return null;
+        emSetLoading(button, true, "Démarrage…", normalText);
+        try {
+          const data = await emApi(emStartUrl(id), { method: "POST" });
+          emCurrentCampaignId = id;
+          emRememberCampaign(id);
+          document
+            .getElementById("campaign-progress")
+            .classList.remove("hidden");
+          emSuccess(
+            `${data.message || "Campagne en file d'envoi."} Le worker Django va traiter les messages.`,
+          );
+          emStartPolling(id);
+          return data;
+        } catch (error) {
+          showError(error.message);
+          return null;
+        } finally {
+          emSetLoading(button, false, "Démarrage…", normalText);
+        }
+      }
+
+      document
+        .getElementById("start-campaign")
+        .addEventListener("click", () => {
+          emStartCampaign(
+            emCurrentCampaignId,
+            document.getElementById("start-campaign"),
+          );
+        });
+
+      async function emGetStatus(id, displayError = true) {
+        try {
+          const data = await emApi(emStatusUrl(id), { method: "GET" });
+          emRememberCampaign(id);
+          return data;
+        } catch (error) {
+          if (displayError) showError(error.message);
+          throw error;
+        }
+      }
+
+      function emProgress(data) {
+        const c = data.campaign || {},
+          r = data.recipients || {};
+        const total = Number(c.total_contacts || 0);
+        const done =
+          Number(r.sent || 0) +
+          Number(r.failed || 0) +
+          Number(r.not_on_whatsapp || 0) +
+          Number(r.skipped || 0);
+        return {
+          total,
+          done,
+          percent: total ? Math.min(100, Math.round((done * 100) / total)) : 0,
+        };
+      }
+
+      function emRenderCurrent(data) {
+        const c = data.campaign || {},
+          r = data.recipients || {},
+          p = emProgress(data);
+        emCurrentCampaignId = c.id;
+        document.getElementById("current-campaign-id").textContent =
+          c.id || "—";
+        document.getElementById("current-campaign-name").textContent =
+          c.name || "Campagne";
+        emSetBadge(
+          document.getElementById("current-campaign-status"),
+          c.status,
+        );
+        document.getElementById("validation-total").textContent =
+          c.total_contacts || 0;
+        document.getElementById("validation-valid").textContent = r.ready || 0;
+        document.getElementById("validation-invalid").textContent =
+          r.not_on_whatsapp || 0;
+        document.getElementById("validation-errors").textContent =
+          r.failed || 0;
+        document.getElementById("start-campaign").disabled =
+          c.status !== "draft" || Number(r.ready || 0) <= 0;
+        document.getElementById("validate-campaign").disabled =
+          c.status !== "draft";
+
+        emSetBadge(document.getElementById("progress-status"), c.status);
+        document.getElementById("progress-ready").textContent = r.ready || 0;
+        document.getElementById("progress-processing").textContent =
+          r.processing || 0;
+        document.getElementById("progress-sent").textContent = r.sent || 0;
+        document.getElementById("progress-failed").textContent = r.failed || 0;
+        document.getElementById("progress-not-whatsapp").textContent =
+          r.not_on_whatsapp || 0;
+        document.getElementById("progress-label").textContent =
+          `${p.done} / ${p.total}`;
+        document.getElementById("progress-bar").style.width = `${p.percent}%`;
+        if (
+          [
+            "queued",
+            "running",
+            "completed",
+            "partial",
+            "failed",
+            "cancelled",
+          ].includes(c.status)
+        )
+          document
+            .getElementById("campaign-progress")
+            .classList.remove("hidden");
+      }
+
+      function emStopPolling() {
+        if (emCampaignPollTimer) {
+          clearInterval(emCampaignPollTimer);
+          emCampaignPollTimer = null;
+        }
+      }
+      async function emPoll(id) {
+        const data = await emGetStatus(id, false).catch(() => null);
+        if (!data) return;
+        emRenderCurrent(data);
+        if (
+          ["completed", "partial", "failed", "cancelled"].includes(
+            data.campaign?.status,
+          )
+        ) {
+          emStopPolling();
+          emLoadCampaigns(false);
+        }
+      }
+      function emStartPolling(id) {
+        emStopPolling();
+        emPoll(id);
+        emCampaignPollTimer = setInterval(() => emPoll(id), 2500);
+      }
+
+      // -----------------------------------------------------------------
+      // Nouvelle campagne
+      // -----------------------------------------------------------------
+      document.getElementById("new-campaign").addEventListener("click", () => {
+        emStopPolling();
+        emCurrentCampaignId = null;
+        selectedContacts.clear();
+        document.getElementById("campaign-name").value = "";
+        emCampaignMessage.value = "";
+        document.getElementById("campaign-message-count").textContent =
+          "0 / 4000";
+        document.getElementById("campaign-consent").checked = false;
+        if (campaignAttachments) campaignAttachments.value = "";
+        if (attachmentPreview) attachmentPreview.innerHTML = "";
+        document.getElementById("campaign-compose").classList.add("hidden");
+        document.getElementById("campaign-validation").classList.add("hidden");
+        document.getElementById("campaign-progress").classList.add("hidden");
+        updateSelectionState();
+        renderContacts();
+        emBulkPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      document
+        .getElementById("view-current-campaign")
+        .addEventListener("click", async () => {
+          if (!emCurrentCampaignId) return;
+          emCampaignsTab.click();
+          await emOpenDetail(emCurrentCampaignId);
+        });
+
+      // -----------------------------------------------------------------
+      // Liste des campagnes
+      // GET /api/messaging/campaigns/ si présent.
+      // Sinon fallback localStorage + GET status pour les campagnes créées ici.
+      // -----------------------------------------------------------------
+      async function emFallbackCampaigns() {
+        const results = await Promise.allSettled(
+          emTrackedIds().map(
+            async (id) => (await emGetStatus(id, false)).campaign,
+          ),
+        );
+        return results
+          .filter((r) => r.status === "fulfilled")
+          .map((r) => r.value)
+          .filter(Boolean);
+      }
+
+      async function emLoadCampaigns(displayError = true) {
+        const loading = document.getElementById("campaigns-loading"),
+          list = document.getElementById("campaigns-list"),
+          empty = document.getElementById("campaigns-empty");
+        loading.classList.remove("hidden");
+        list.classList.add("hidden");
+        empty.classList.add("hidden");
+        let campaigns = [];
+        try {
+          const data = await emApi(EM_CAMPAIGNS_LIST_URL, { method: "GET" });
+          campaigns = data.campaigns || [];
+          campaigns.forEach((c) => emRememberCampaign(c.id));
+        } catch (error) {
+          if (error.status === 404) campaigns = await emFallbackCampaigns();
+          else if (displayError) showError(error.message);
+        }
+        list.innerHTML = "";
+        empty.classList.toggle("hidden", campaigns.length > 0);
+        campaigns.forEach((c) => {
+          const row = document.createElement("div");
+          row.className =
+            "flex flex-col gap-4 px-6 py-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between";
+          const left = document.createElement("div");
+          left.className = "min-w-0";
+          const head = document.createElement("div");
+          head.className = "flex flex-wrap items-center gap-3";
+          const name = document.createElement("p");
+          name.className = "font-bold";
+          name.textContent = c.name || `Campagne #${c.id}`;
+          const badge = document.createElement("span");
+          emSetBadge(badge, c.status);
+          head.append(name, badge);
+          const meta = document.createElement("p");
+          meta.className = "mt-2 text-xs text-slate-500";
+          meta.textContent = [
+            `#${c.id}`,
+            `${c.total_contacts || 0} contact(s)`,
+            `${c.sent_count || 0} envoyé(s)`,
+            `${c.failed_count || 0} échec(s)`,
+            `${c.not_on_whatsapp_count || 0} non WhatsApp`,
+            c.created_at ? `Créée le ${emFormatDate(c.created_at)}` : null,
+          ]
+            .filter(Boolean)
+            .join(" • ");
+          left.append(head, meta);
+          const actions = document.createElement("div");
+          actions.className = "flex shrink-0 flex-wrap gap-2";
+
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className =
+            "rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold hover:bg-slate-50";
+          btn.textContent = "Ouvrir";
+          btn.addEventListener("click", () => emOpenDetail(c.id));
+          actions.appendChild(btn);
+
+          if (!["queued", "running"].includes(c.status)) {
+            const relaunch = document.createElement("button");
+            relaunch.type = "button";
+            relaunch.className =
+              "rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-700";
+            relaunch.textContent = "Relancer";
+            relaunch.addEventListener("click", () =>
+              emOpenRelaunch(c.id, c.name || `Campagne #${c.id}`),
+            );
+            actions.appendChild(relaunch);
+          }
+
+          row.append(left, actions);
+          list.appendChild(row);
+        });
         loading.classList.add("hidden");
-        emSetLoading(button,false,"Vérification…",normalText);
-    }
-}
+        list.classList.remove("hidden");
+      }
 
-document.getElementById("validate-campaign").addEventListener("click", async () => {
-    const v = await emValidateCampaign(emCurrentCampaignId, document.getElementById("validate-campaign"));
-    if (v) {
-        const data = await emGetStatus(emCurrentCampaignId, false).catch(()=>null);
-        if (data) emRenderCurrent(data);
-    }
-});
+      document
+        .getElementById("refresh-campaigns")
+        .addEventListener("click", () => emLoadCampaigns());
 
-// -----------------------------------------------------------------
-// Démarrer
-// -----------------------------------------------------------------
-async function emStartCampaign(id, button, normalText="Démarrer la campagne") {
-    hideError(); emHideSuccess();
-    if (!id) return null;
-    emSetLoading(button,true,"Démarrage…",normalText);
-    try {
-        const data = await emApi(emStartUrl(id), {method:"POST"});
-        emCurrentCampaignId = id;
-        emRememberCampaign(id);
-        document.getElementById("campaign-progress").classList.remove("hidden");
-        emSuccess(`${data.message || "Campagne en file d'envoi."} Le worker Django va traiter les messages.`);
-        emStartPolling(id);
-        return data;
-    } catch(error) {
-        showError(error.message);
-        return null;
-    } finally {
-        emSetLoading(button,false,"Démarrage…",normalText);
-    }
-}
+      // -----------------------------------------------------------------
+      // Détail campagne
+      // -----------------------------------------------------------------
+      function emStopDetailPoll() {
+        if (emDetailPollTimer) {
+          clearInterval(emDetailPollTimer);
+          emDetailPollTimer = null;
+        }
+      }
+      function emRenderDetail(data) {
+        const c = data.campaign || {},
+          r = data.recipients || {},
+          p = emProgress(data);
+        emDetailCampaignId = c.id;
+        document.getElementById("detail-name").textContent =
+          c.name || "Campagne";
+        document.getElementById("detail-id").textContent = c.id || "—";
+        emSetBadge(document.getElementById("detail-status"), c.status);
+        for (const [id, key] of [
+          ["detail-pending", "pending"],
+          ["detail-ready", "ready"],
+          ["detail-processing", "processing"],
+          ["detail-sent", "sent"],
+          ["detail-failed", "failed"],
+          ["detail-not-whatsapp", "not_on_whatsapp"],
+        ])
+          document.getElementById(id).textContent = r[key] || 0;
+        document.getElementById("detail-total").textContent =
+          `${c.total_contacts || 0} contact(s)`;
+        document.getElementById("detail-started").textContent = emFormatDate(
+          c.started_at,
+        );
+        document.getElementById("detail-completed").textContent = emFormatDate(
+          c.completed_at,
+        );
+        document.getElementById("detail-progress-bar").style.width =
+          `${p.percent}%`;
+        document.getElementById("detail-progress-label").textContent =
+          `${p.done} / ${p.total}`;
+        const draft = c.status === "draft";
+        const relaunchButton = document.getElementById("detail-relaunch");
+        relaunchButton.dataset.campaignName = c.name || `Campagne #${c.id}`;
+        relaunchButton.classList.toggle(
+          "hidden",
+          ["queued", "running"].includes(c.status),
+        );
+        document
+          .getElementById("detail-validate")
+          .classList.toggle(
+            "hidden",
+            !draft || Number(r.pending || 0) + Number(r.failed || 0) <= 0,
+          );
+        document
+          .getElementById("detail-start")
+          .classList.toggle("hidden", !draft || Number(r.ready || 0) <= 0);
+        document.getElementById("campaign-detail").classList.remove("hidden");
+        emStopDetailPoll();
+        if (["queued", "running"].includes(c.status))
+          emDetailPollTimer = setInterval(() => emRefreshDetail(false), 2500);
+      }
+      async function emOpenDetail(id) {
+        const data = await emGetStatus(id).catch(() => null);
+        if (!data) return;
+        emRenderDetail(data);
+        document
+          .getElementById("campaign-detail")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      async function emRefreshDetail(show = true) {
+        if (!emDetailCampaignId) return;
+        const data = await emGetStatus(emDetailCampaignId, show).catch(
+          () => null,
+        );
+        if (data) emRenderDetail(data);
+      }
+      document
+        .getElementById("detail-refresh")
+        .addEventListener("click", () => emRefreshDetail());
+      document
+        .getElementById("detail-validate")
+        .addEventListener("click", async () => {
+          const b = document.getElementById("detail-validate");
+          const v = await emValidateCampaign(
+            emDetailCampaignId,
+            b,
+            "Vérifier WhatsApp",
+          );
+          if (v) {
+            await emRefreshDetail();
+            await emLoadCampaigns(false);
+          }
+        });
+      document
+        .getElementById("detail-start")
+        .addEventListener("click", async () => {
+          const b = document.getElementById("detail-start");
+          const d = await emStartCampaign(emDetailCampaignId, b, "Démarrer");
+          if (d) {
+            await emRefreshDetail();
+            await emLoadCampaigns(false);
+          }
+        });
 
-document.getElementById("start-campaign").addEventListener("click", () => {
-    emStartCampaign(emCurrentCampaignId, document.getElementById("start-campaign"));
-});
+      document
+        .getElementById("detail-relaunch")
+        .addEventListener("click", () => {
+          const button = document.getElementById("detail-relaunch");
+          if (!emDetailCampaignId) return;
+          emOpenRelaunch(
+            emDetailCampaignId,
+            button.dataset.campaignName || `Campagne #${emDetailCampaignId}`,
+          );
+        });
 
-async function emGetStatus(id, displayError=true) {
-    try {
-        const data = await emApi(emStatusUrl(id), {method:"GET"});
-        emRememberCampaign(id);
-        return data;
-    } catch(error) {
-        if (displayError) showError(error.message);
-        throw error;
-    }
-}
+      campaignAttachments.addEventListener("change", () => {
+        hideError();
+        attachmentPreview.innerHTML = "";
 
-function emProgress(data) {
-    const c = data.campaign || {}, r = data.recipients || {};
-    const total = Number(c.total_contacts || 0);
-    const done = Number(r.sent||0)+Number(r.failed||0)+Number(r.not_on_whatsapp||0)+Number(r.skipped||0);
-    return {total, done, percent: total ? Math.min(100,Math.round(done*100/total)) : 0};
-}
+        const files = Array.from(campaignAttachments.files);
 
-function emRenderCurrent(data) {
-    const c=data.campaign||{}, r=data.recipients||{}, p=emProgress(data);
-    emCurrentCampaignId=c.id;
-    document.getElementById("current-campaign-id").textContent=c.id||"—";
-    document.getElementById("current-campaign-name").textContent=c.name||"Campagne";
-    emSetBadge(document.getElementById("current-campaign-status"),c.status);
-    document.getElementById("validation-total").textContent=c.total_contacts||0;
-    document.getElementById("validation-valid").textContent=r.ready||0;
-    document.getElementById("validation-invalid").textContent=r.not_on_whatsapp||0;
-    document.getElementById("validation-errors").textContent=r.failed||0;
-    document.getElementById("start-campaign").disabled = c.status!=="draft" || Number(r.ready||0)<=0;
-    document.getElementById("validate-campaign").disabled = c.status!=="draft";
+        if (files.length > 5) {
+          showError("Maximum 5 fichiers par campagne.");
+          campaignAttachments.value = "";
+          return;
+        }
 
-    emSetBadge(document.getElementById("progress-status"),c.status);
-    document.getElementById("progress-ready").textContent=r.ready||0;
-    document.getElementById("progress-processing").textContent=r.processing||0;
-    document.getElementById("progress-sent").textContent=r.sent||0;
-    document.getElementById("progress-failed").textContent=r.failed||0;
-    document.getElementById("progress-not-whatsapp").textContent=r.not_on_whatsapp||0;
-    document.getElementById("progress-label").textContent=`${p.done} / ${p.total}`;
-    document.getElementById("progress-bar").style.width=`${p.percent}%`;
-    if (["queued","running","completed","partial","failed","cancelled"].includes(c.status)) document.getElementById("campaign-progress").classList.remove("hidden");
-}
+        const oversized = files.find((file) => file.size > 5 * 1024 * 1024);
+        if (oversized) {
+          showError(`${oversized.name} dépasse la limite de 5 Mo.`);
+          campaignAttachments.value = "";
+          return;
+        }
 
-function emStopPolling(){ if(emCampaignPollTimer){clearInterval(emCampaignPollTimer);emCampaignPollTimer=null;} }
-async function emPoll(id){
-    const data=await emGetStatus(id,false).catch(()=>null); if(!data)return;
-    emRenderCurrent(data);
-    if(["completed","partial","failed","cancelled"].includes(data.campaign?.status)){emStopPolling();emLoadCampaigns(false);}
-}
-function emStartPolling(id){emStopPolling();emPoll(id);emCampaignPollTimer=setInterval(()=>emPoll(id),2500);}
+        for (const file of files) {
+          const row = document.createElement("div");
+          row.className =
+            "flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3";
 
-// -----------------------------------------------------------------
-// Nouvelle campagne
-// -----------------------------------------------------------------
-document.getElementById("new-campaign").addEventListener("click", () => {
-    emStopPolling(); emCurrentCampaignId=null; selectedContacts.clear();
-    document.getElementById("campaign-name").value="";
-    emCampaignMessage.value="";
-    document.getElementById("campaign-message-count").textContent="0 / 4000";
-    document.getElementById("campaign-consent").checked=false;
-    document.getElementById("campaign-compose").classList.add("hidden");
-    document.getElementById("campaign-validation").classList.add("hidden");
-    document.getElementById("campaign-progress").classList.add("hidden");
-    updateSelectionState(); renderContacts();
-    emBulkPanel.scrollIntoView({behavior:"smooth",block:"start"});
-});
+          const icon = document.createElement("div");
+          icon.className =
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-lg shadow-sm";
+          icon.textContent = file.type.startsWith("image/") ? "🖼️" : "📄";
 
-document.getElementById("view-current-campaign").addEventListener("click", async () => {
-    if(!emCurrentCampaignId)return;
-    emCampaignsTab.click();
-    await emOpenDetail(emCurrentCampaignId);
-});
+          const info = document.createElement("div");
+          info.className = "min-w-0 flex-1";
 
-// -----------------------------------------------------------------
-// Liste des campagnes
-// GET /api/messaging/campaigns/ si présent.
-// Sinon fallback localStorage + GET status pour les campagnes créées ici.
-// -----------------------------------------------------------------
-async function emFallbackCampaigns(){
-    const results=await Promise.allSettled(emTrackedIds().map(async id=>(await emGetStatus(id,false)).campaign));
-    return results.filter(r=>r.status==="fulfilled").map(r=>r.value).filter(Boolean);
-}
+          const name = document.createElement("p");
+          name.className = "truncate text-sm font-semibold text-slate-800";
+          name.textContent = file.name;
 
-async function emLoadCampaigns(displayError=true){
-    const loading=document.getElementById("campaigns-loading"), list=document.getElementById("campaigns-list"), empty=document.getElementById("campaigns-empty");
-    loading.classList.remove("hidden"); list.classList.add("hidden"); empty.classList.add("hidden");
-    let campaigns=[];
-    try {
-        const data=await emApi(EM_CAMPAIGNS_LIST_URL,{method:"GET"});
-        campaigns=data.campaigns||[]; campaigns.forEach(c=>emRememberCampaign(c.id));
-    } catch(error) {
-        if(error.status===404) campaigns=await emFallbackCampaigns();
-        else if(displayError) showError(error.message);
-    }
-    list.innerHTML=""; empty.classList.toggle("hidden",campaigns.length>0);
-    campaigns.forEach(c=>{
-        const row=document.createElement("div"); row.className="flex flex-col gap-4 px-6 py-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between";
-        const left=document.createElement("div"); left.className="min-w-0";
-        const head=document.createElement("div"); head.className="flex flex-wrap items-center gap-3";
-        const name=document.createElement("p"); name.className="font-bold"; name.textContent=c.name||`Campagne #${c.id}`;
-        const badge=document.createElement("span"); emSetBadge(badge,c.status); head.append(name,badge);
-        const meta=document.createElement("p"); meta.className="mt-2 text-xs text-slate-500";
-        meta.textContent=[`#${c.id}`,`${c.total_contacts||0} contact(s)`,`${c.sent_count||0} envoyé(s)`,`${c.failed_count||0} échec(s)`,`${c.not_on_whatsapp_count||0} non WhatsApp`, c.created_at?`Créée le ${emFormatDate(c.created_at)}`:null].filter(Boolean).join(" • ");
-        left.append(head,meta);
-        const btn=document.createElement("button"); btn.type="button"; btn.className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold"; btn.textContent="Ouvrir"; btn.addEventListener("click",()=>emOpenDetail(c.id));
-        row.append(left,btn); list.appendChild(row);
-    });
-    loading.classList.add("hidden"); list.classList.remove("hidden");
-}
+          const size = document.createElement("p");
+          size.className = "mt-1 text-xs text-slate-500";
+          size.textContent = `${(file.size / 1024 / 1024).toFixed(2)} Mo • ${file.type || "Fichier"}`;
 
-document.getElementById("refresh-campaigns").addEventListener("click",()=>emLoadCampaigns());
-
-// -----------------------------------------------------------------
-// Détail campagne
-// -----------------------------------------------------------------
-function emStopDetailPoll(){if(emDetailPollTimer){clearInterval(emDetailPollTimer);emDetailPollTimer=null;}}
-function emRenderDetail(data){
-    const c=data.campaign||{},r=data.recipients||{},p=emProgress(data); emDetailCampaignId=c.id;
-    document.getElementById("detail-name").textContent=c.name||"Campagne"; document.getElementById("detail-id").textContent=c.id||"—"; emSetBadge(document.getElementById("detail-status"),c.status);
-    for(const [id,key] of [["detail-pending","pending"],["detail-ready","ready"],["detail-processing","processing"],["detail-sent","sent"],["detail-failed","failed"],["detail-not-whatsapp","not_on_whatsapp"]]) document.getElementById(id).textContent=r[key]||0;
-    document.getElementById("detail-total").textContent=`${c.total_contacts||0} contact(s)`; document.getElementById("detail-started").textContent=emFormatDate(c.started_at); document.getElementById("detail-completed").textContent=emFormatDate(c.completed_at); document.getElementById("detail-progress-bar").style.width=`${p.percent}%`; document.getElementById("detail-progress-label").textContent=`${p.done} / ${p.total}`;
-    const draft=c.status==="draft"; document.getElementById("detail-validate").classList.toggle("hidden",!draft || Number(r.pending||0)+Number(r.failed||0)<=0); document.getElementById("detail-start").classList.toggle("hidden",!draft || Number(r.ready||0)<=0);
-    document.getElementById("campaign-detail").classList.remove("hidden"); emStopDetailPoll(); if(["queued","running"].includes(c.status)) emDetailPollTimer=setInterval(()=>emRefreshDetail(false),2500);
-}
-async function emOpenDetail(id){const data=await emGetStatus(id).catch(()=>null);if(!data)return;emRenderDetail(data);document.getElementById("campaign-detail").scrollIntoView({behavior:"smooth",block:"start"});}
-async function emRefreshDetail(show=true){if(!emDetailCampaignId)return;const data=await emGetStatus(emDetailCampaignId,show).catch(()=>null);if(data)emRenderDetail(data);}
-document.getElementById("detail-refresh").addEventListener("click",()=>emRefreshDetail());
-document.getElementById("detail-validate").addEventListener("click",async()=>{const b=document.getElementById("detail-validate");const v=await emValidateCampaign(emDetailCampaignId,b,"Vérifier WhatsApp");if(v){await emRefreshDetail();await emLoadCampaigns(false);}});
-document.getElementById("detail-start").addEventListener("click",async()=>{const b=document.getElementById("detail-start");const d=await emStartCampaign(emDetailCampaignId,b,"Démarrer");if(d){await emRefreshDetail();await emLoadCampaigns(false);}});
-
-</script>
-
-</body>
-
+          info.append(name, size);
+          row.append(icon, info);
+          attachmentPreview.appendChild(row);
+        }
+      });
+    </script>
+  </body>
 </html>

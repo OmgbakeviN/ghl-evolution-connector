@@ -342,3 +342,64 @@ class EvolutionClient:
                 201,
             ),
         )
+    
+    def send_media(
+        self,
+        *,
+        instance_name: str,
+        number: str,
+        media_type: str,
+        media: str,
+        caption: str = "",
+        file_name: str = "",
+        mimetype: str = "",
+        delay_ms: int = 1000,
+    ):
+
+        safe_name = quote(
+            instance_name,
+            safe="",
+        )
+
+        media_type = str(
+            media_type
+        ).lower()
+
+        if media_type not in {
+            "image",
+            "document",
+            "video",
+            "audio",
+        }:
+            raise EvolutionAPIError(
+                (
+                    "Type média Evolution "
+                    "non supporté."
+                )
+            )
+
+        payload = {
+            "number": str(number),
+            "mediatype": media_type,
+            "media": media,
+            "delay": delay_ms,
+        }
+
+        if caption:
+            payload["caption"] = caption
+
+        if file_name:
+            payload["fileName"] = file_name
+
+        if mimetype:
+            payload["mimetype"] = mimetype
+
+        return self._request(
+            "POST",
+            f"/message/sendMedia/{safe_name}",
+            json=payload,
+            expected_statuses=(
+                200,
+                201,
+            ),
+        )

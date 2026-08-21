@@ -187,3 +187,7 @@ GHL_CONVERSATION_PROVIDER_ID = os.getenv(
     "GHL_CONVERSATION_PROVIDER_ID",
     "",
 ).strip()
+
+MEDIA_URL = "/media/"
+
+MEDIA_ROOT = BASE_DIR/"media"

@@ -1,4 +1,7 @@
-import time
+import time, mimetypes
+
+from pathlib import Path
+from urllib.parse import urlparse
 from collections.abc import Iterable
 
 from django.db import transaction
@@ -17,6 +20,7 @@ from apps.ghl.client import (
 from .models import (
     BulkCampaign,
     BulkCampaignRecipient,
+    ProviderOutboundJob,
 )
 
 WHATSAPP_CHECK_BATCH_SIZE = 10
@@ -737,12 +741,19 @@ def process_bulk_recipient(
 
     try:
 
+        attachments = [
+            attachment.public_url()
+            for attachment
+            in campaign.attachments.all()
+        ]
+
         response = (
             ghl_client.send_provider_message(
                 contact_id=(
                     recipient.ghl_contact_id
                 ),
                 message=rendered_message,
+                attachments=attachments,
             )
         )
 
@@ -888,3 +899,357 @@ def extract_ghl_message_ids(
             message_id,
             conversation_id,
         )
+
+def detect_evolution_media_type(
+    url: str,
+):
+
+    path = urlparse(url).path
+
+    mime_type, _ = (
+        mimetypes.guess_type(
+            path
+        )
+    )
+
+    mime_type = mime_type or ""
+
+    if mime_type.startswith(
+        "image/"
+    ):
+        return (
+            "image",
+            mime_type,
+        )
+
+    return (
+        "document",
+        mime_type,
+    )
+
+
+def media_filename(
+    url: str,
+):
+
+    return Path(
+        urlparse(url).path
+    ).name
+
+
+
+def claim_next_provider_outbound_job():
+    """
+    Réserve un Delivery Job HighLevel depuis PostgreSQL.
+    """
+
+    with transaction.atomic():
+        job = (
+            ProviderOutboundJob.objects
+            .select_for_update(skip_locked=True)
+            .filter(
+                status=ProviderOutboundJob.Status.PENDING
+            )
+            .order_by("created_at", "id")
+            .first()
+        )
+
+        if job is None:
+            return None
+
+        job.status = ProviderOutboundJob.Status.PROCESSING
+        job.attempts += 1
+        job.last_error = ""
+
+        job.save(
+            update_fields=[
+                "status",
+                "attempts",
+                "last_error",
+                "updated_at",
+            ]
+        )
+
+        return job.pk
+
+
+def process_provider_outbound_job(
+    job_id: int,
+) -> dict:
+    """
+    Effectue le vrai transport WhatsApp après que HighLevel a déjà
+    reçu un HTTP 200 de la Delivery URL.
+    """
+
+    job = (
+        ProviderOutboundJob.objects
+        .select_related(
+            "recipient",
+            "recipient__campaign",
+            "recipient__campaign__installation",
+            "recipient__campaign__installation__evolution_instance",
+        )
+        .get(pk=job_id)
+    )
+
+    if job.status != ProviderOutboundJob.Status.PROCESSING:
+        return {
+            "status": "ignored",
+            "job_id": job.pk,
+        }
+
+    recipient = job.recipient
+    campaign = recipient.campaign
+    payload = job.payload or {}
+
+    # Protection idempotente.
+    if recipient.status == BulkCampaignRecipient.Status.SENT:
+        job.status = ProviderOutboundJob.Status.SENT
+        job.processed_at = timezone.now()
+        job.save(
+            update_fields=[
+                "status",
+                "processed_at",
+                "updated_at",
+            ]
+        )
+        return {
+            "status": "duplicate",
+            "job_id": job.pk,
+            "recipient_id": recipient.pk,
+        }
+
+    try:
+        evolution_instance = (
+            campaign.installation.evolution_instance
+        )
+    except EvolutionInstance.DoesNotExist:
+        error_message = (
+            "Aucune instance Evolution associée au sous-compte."
+        )
+        return _fail_provider_outbound_job(
+            job,
+            recipient,
+            error_message,
+        )
+
+    if evolution_instance.status != EvolutionInstance.Status.OPEN:
+        error_message = "WhatsApp est déconnecté."
+        return _fail_provider_outbound_job(
+            job,
+            recipient,
+            error_message,
+        )
+
+    message = str(
+        payload.get("message")
+        or recipient.rendered_message
+        or ""
+    ).strip()
+
+    attachments = payload.get("attachments") or []
+
+    if not isinstance(attachments, list):
+        attachments = []
+
+    if not message:
+        return _fail_provider_outbound_job(
+            job,
+            recipient,
+            "Le message provider est vide.",
+        )
+
+    evolution_client = EvolutionClient()
+    evolution_message_ids = []
+
+    try:
+        if attachments:
+            for index, media_url in enumerate(attachments):
+                media_url = str(media_url or "").strip()
+
+                if not media_url:
+                    continue
+
+                media_type, mime_type = (
+                    detect_evolution_media_type(
+                        media_url
+                    )
+                )
+
+                response = (
+                    evolution_client.send_media(
+                        instance_name=(
+                            evolution_instance.instance_name
+                        ),
+                        number=recipient.normalized_phone,
+                        media_type=media_type,
+                        media=media_url,
+                        caption=(
+                            message
+                            if index == 0
+                            else ""
+                        ),
+                        file_name=(
+                            media_filename(media_url)
+                        ),
+                        mimetype=mime_type,
+                        delay_ms=1000,
+                    )
+                )
+
+                message_id = (
+                    extract_evolution_message_id(
+                        response
+                    )
+                )
+
+                if message_id:
+                    evolution_message_ids.append(
+                        message_id
+                    )
+        else:
+            response = (
+                evolution_client.send_text(
+                    instance_name=(
+                        evolution_instance.instance_name
+                    ),
+                    number=recipient.normalized_phone,
+                    text=message,
+                    delay_ms=1000,
+                )
+            )
+
+            message_id = (
+                extract_evolution_message_id(
+                    response
+                )
+            )
+
+            if message_id:
+                evolution_message_ids.append(
+                    message_id
+                )
+
+    except EvolutionAPIError as exc:
+        recipient.evolution_message_ids = (
+            evolution_message_ids
+        )
+        recipient.save(
+            update_fields=[
+                "evolution_message_ids",
+                "updated_at",
+            ]
+        )
+
+        return _fail_provider_outbound_job(
+            job,
+            recipient,
+            str(exc),
+        )
+
+    now = timezone.now()
+
+    with transaction.atomic():
+        job = (
+            ProviderOutboundJob.objects
+            .select_for_update()
+            .get(pk=job.pk)
+        )
+
+        recipient = (
+            BulkCampaignRecipient.objects
+            .select_for_update()
+            .get(pk=recipient.pk)
+        )
+
+        job.status = ProviderOutboundJob.Status.SENT
+        job.last_error = ""
+        job.processed_at = now
+        job.save(
+            update_fields=[
+                "status",
+                "last_error",
+                "processed_at",
+                "updated_at",
+            ]
+        )
+
+        recipient.status = (
+            BulkCampaignRecipient.Status.SENT
+        )
+        recipient.provider_delivery_status = (
+            BulkCampaignRecipient
+            .ProviderDeliveryStatus.SENT
+        )
+        recipient.evolution_message_ids = (
+            evolution_message_ids
+        )
+        recipient.evolution_message_id = (
+            evolution_message_ids[0]
+            if evolution_message_ids
+            else ""
+        )
+        recipient.sent_at = now
+        recipient.last_error = ""
+
+        recipient.save(
+            update_fields=[
+                "status",
+                "provider_delivery_status",
+                "evolution_message_ids",
+                "evolution_message_id",
+                "sent_at",
+                "last_error",
+                "updated_at",
+            ]
+        )
+
+    refresh_campaign_progress(
+        campaign.pk
+    )
+
+    return {
+        "status": "sent",
+        "job_id": job.pk,
+        "recipient_id": recipient.pk,
+        "evolution_message_ids": evolution_message_ids,
+    }
+
+
+def _fail_provider_outbound_job(
+    job: ProviderOutboundJob,
+    recipient: BulkCampaignRecipient,
+    error_message: str,
+) -> dict:
+
+    now = timezone.now()
+
+    ProviderOutboundJob.objects.filter(
+        pk=job.pk
+    ).update(
+        status=ProviderOutboundJob.Status.FAILED,
+        last_error=error_message,
+        processed_at=now,
+    )
+
+    BulkCampaignRecipient.objects.filter(
+        pk=recipient.pk
+    ).update(
+        status=BulkCampaignRecipient.Status.FAILED,
+        provider_delivery_status=(
+            BulkCampaignRecipient
+            .ProviderDeliveryStatus.FAILED
+        ),
+        last_error=error_message,
+    )
+
+    refresh_campaign_progress(
+        recipient.campaign_id
+    )
+
+    return {
+        "status": "failed",
+        "job_id": job.pk,
+        "recipient_id": recipient.pk,
+        "error": error_message,
+    }

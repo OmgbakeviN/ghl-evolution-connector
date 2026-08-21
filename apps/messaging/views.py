@@ -1,3 +1,5 @@
+import json 
+
 from django.db import transaction
 
 from rest_framework import status
@@ -8,6 +10,11 @@ from rest_framework.decorators import (
 )
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+
+from .attachments import (
+    MAX_CAMPAIGN_ATTACHMENTS,
+    validate_campaign_file,
+)
 
 from apps.evolution.client import (
     EvolutionAPIError,
@@ -31,9 +38,41 @@ from apps.ghl.models import GHLInstallation
 from .models import (
     BulkCampaign,
     BulkCampaignRecipient,
+    CampaignAttachment,
 )
 from .utils import normalize_phone
 
+def parse_contact_ids(value):
+
+    if isinstance(value, list):
+        return value
+
+    if isinstance(value, str):
+
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return []
+
+        if isinstance(parsed, list):
+            return parsed
+
+    return []
+
+
+def parse_boolean(value):
+
+    if isinstance(value, bool):
+        return value
+
+    return str(
+        value or ""
+    ).lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
 def extract_bearer_token(request) -> str:
     authorization = request.headers.get(
@@ -115,14 +154,66 @@ def create_bulk_campaign_draft(request):
         request.data.get("message") or ""
     ).strip()
 
-    contact_ids = request.data.get(
-        "contact_ids",
-        [],
+    contact_ids = parse_contact_ids(
+        request.data.get(
+            "contact_ids", 
+            [],
+        )
     )
 
-    confirmed_opt_in = bool(
-        request.data.get("confirmed_opt_in")
+    confirmed_opt_in = parse_boolean(
+        request.data.get(
+            "confirmed_opt_in",
+        )
     )
+
+    uploaded_files = (
+        request.FILES.getlist(
+            "attachments"
+        )
+    )
+
+    if (
+        len(uploaded_files)
+        > MAX_CAMPAIGN_ATTACHMENTS
+    ):
+        return Response(
+            {
+                "success": False,
+                "message": (
+                    "Maximum 5 fichiers "
+                    "par campagne."
+                ),
+            },
+            status=400,
+        )
+
+
+    validated_files = []
+
+    for uploaded_file in uploaded_files:
+
+        try:
+            kind = validate_campaign_file(
+                uploaded_file
+            )
+
+        except ValueError as exc:
+
+            return Response(
+                {
+                    "success": False,
+                    "message": str(exc),
+                },
+                status=400,
+            )
+
+        validated_files.append(
+            (
+                uploaded_file,
+                kind,
+            )
+        )
 
     if not name:
         return Response(
@@ -305,6 +396,22 @@ def create_bulk_campaign_draft(request):
         BulkCampaignRecipient.objects.bulk_create(
             recipients
         )
+
+        for uploaded_file, kind in validated_files:
+
+            CampaignAttachment.objects.create(
+                campaign=campaign,
+                file=uploaded_file,
+                original_name=(
+                    uploaded_file.name
+                ),
+                mime_type=(
+                    uploaded_file.content_type
+                    or ""
+                ),
+                size=uploaded_file.size,
+                kind=kind,
+            )
 
     return Response(
         {
@@ -854,4 +961,310 @@ def list_bulk_campaigns(request):
             "success": True,
             "campaigns": data,
         }
+    )
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def relaunch_bulk_campaign(
+request,
+campaign_id: int,
+):
+
+    token = extract_bearer_token(
+        request
+    )
+
+    if not token:
+
+        return Response(
+            {
+                "success": False,
+                "message": "Token absent.",
+            },
+            status=401,
+        )
+
+    try:
+
+        context = decode_embedded_token(
+            token
+        )
+
+    except (
+        GHLEmbeddedTokenExpired,
+        GHLEmbeddedTokenError,
+    ) as exc:
+
+        return Response(
+            {
+                "success": False,
+                "message": str(exc),
+            },
+            status=401,
+        )
+
+
+    source = (
+        BulkCampaign.objects
+        .prefetch_related(
+            "recipients",
+            "attachments",
+        )
+        .filter(
+            pk=campaign_id,
+            installation__location_id=(
+                context["location_id"]
+            ),
+        )
+        .first()
+    )
+
+
+    if source is None:
+
+        return Response(
+            {
+                "success": False,
+                "message": (
+                    "Campagne introuvable."
+                ),
+            },
+            status=404,
+        )
+
+
+    if source.status in {
+        BulkCampaign.Status.QUEUED,
+        BulkCampaign.Status.RUNNING,
+    }:
+
+        return Response(
+            {
+                "success": False,
+                "message": (
+                    "Une campagne active "
+                    "ne peut pas être relancée."
+                ),
+            },
+            status=400,
+        )
+
+
+    mode = str(
+        request.data.get("mode")
+        or "same"
+    ).lower()
+
+
+    if mode not in {
+        "same",
+        "custom",
+    }:
+
+        return Response(
+            {
+                "success": False,
+                "message": (
+                    "Mode de relance invalide."
+                ),
+            },
+            status=400,
+        )
+
+
+    if mode == "same":
+
+        message = (
+            source.message_template
+        )
+
+    else:
+
+        message = str(
+            request.data.get("message")
+            or ""
+        ).strip()
+
+        if not message:
+
+            return Response(
+                {
+                    "success": False,
+                    "message": (
+                        "Le nouveau message "
+                        "est obligatoire."
+                    ),
+                },
+                status=400,
+            )
+
+
+    name = str(
+        request.data.get("name")
+        or (
+            f"{source.name} "
+            f"- Relance"
+        )
+    ).strip()
+
+
+    copy_attachments = parse_boolean(
+        request.data.get(
+            "copy_attachments",
+            True,
+        )
+    )
+
+
+    with transaction.atomic():
+
+        relaunch_number = (
+            source.relaunches.count()
+            + 1
+        )
+
+        new_campaign = (
+            BulkCampaign.objects.create(
+                installation=(
+                    source.installation
+                ),
+
+                source_campaign=source,
+
+                relaunch_number=(
+                    relaunch_number
+                ),
+
+                name=name[:255],
+
+                message_template=message,
+
+                status=(
+                    BulkCampaign.Status.DRAFT
+                ),
+
+                created_by_highlevel_user_id=(
+                    context["user_id"]
+                ),
+
+                total_contacts=(
+                    source.recipients.count()
+                ),
+            )
+        )
+
+
+        new_recipients = []
+
+        for old in source.recipients.all():
+
+            new_recipients.append(
+                BulkCampaignRecipient(
+                    campaign=new_campaign,
+
+                    ghl_contact_id=(
+                        old.ghl_contact_id
+                    ),
+
+                    first_name=(
+                        old.first_name
+                    ),
+
+                    last_name=(
+                        old.last_name
+                    ),
+
+                    email=old.email,
+
+                    phone=old.phone,
+
+                    normalized_phone=(
+                        old.normalized_phone
+                    ),
+
+                    status=(
+                        BulkCampaignRecipient
+                        .Status.PENDING
+                    ),
+
+                    is_on_whatsapp=None,
+                )
+            )
+
+
+        BulkCampaignRecipient.objects.bulk_create(
+            new_recipients
+        )
+
+
+        if copy_attachments:
+
+            for old_attachment in (
+                source.attachments.all()
+            ):
+
+                CampaignAttachment.objects.create(
+                    campaign=new_campaign,
+
+                    file=(
+                        old_attachment.file.name
+                    ),
+
+                    original_name=(
+                        old_attachment
+                        .original_name
+                    ),
+
+                    mime_type=(
+                        old_attachment
+                        .mime_type
+                    ),
+
+                    size=(
+                        old_attachment.size
+                    ),
+
+                    kind=(
+                        old_attachment.kind
+                    ),
+                )
+
+
+    return Response(
+        {
+            "success": True,
+
+            "message": (
+                "Nouvelle campagne "
+                "de relance créée."
+            ),
+
+            "campaign": {
+                "id": new_campaign.pk,
+
+                "name": (
+                    new_campaign.name
+                ),
+
+                "status": (
+                    new_campaign.status
+                ),
+
+                "source_campaign_id": (
+                    source.pk
+                ),
+
+                "relaunch_number": (
+                    new_campaign
+                    .relaunch_number
+                ),
+
+                "total_contacts": (
+                    new_campaign
+                    .total_contacts
+                ),
+            },
+        },
+        status=201,
     )

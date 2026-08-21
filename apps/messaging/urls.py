@@ -4,7 +4,8 @@ from .views import ( create_bulk_campaign_draft,
     validate_bulk_campaign,
     bulk_campaign_status,
     start_bulk_campaign,
-    list_bulk_campaigns
+    list_bulk_campaigns,
+    relaunch_bulk_campaign,
 )
 
 from .provider_views import ghl_provider_outbound
@@ -44,4 +45,9 @@ urlpatterns = [
         ghl_provider_outbound,
         name="provider-outbound",
     ),
+    path(
+        "campaigns/<int:campaign_id>/relaunch/",
+        relaunch_bulk_campaign,
+        name="relaunch-campaign",   
+    )
 ]

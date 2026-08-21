@@ -195,7 +195,12 @@ class GHLClient:
         *,
         contact_id: str,
         message: str,
+        attachments=None,
     ) -> dict[str, Any]:
+        
+        attachments = list(
+            attachments or []
+        )
 
         contact_id = str(
             contact_id or ""
@@ -236,6 +241,9 @@ class GHLClient:
             "message": message,
             "conversationProviderId": provider_id,
         }
+
+        if attachments:
+            payload["attachments"] = attachments
 
         return self._request(
             "POST",
@@ -248,7 +256,12 @@ class GHLClient:
         *,
         contact_id: str,
         message: str,
+        attachments=None,
     ) -> dict[str, Any]:
+        
+        attachments = list(
+            attachments or []
+        )
 
         contact_id = str(
             contact_id or ""
@@ -289,6 +302,9 @@ class GHLClient:
             "message": message,
             "conversationProviderId": provider_id,
         }
+
+        if attachments:
+            payload["attachments"] = attachments
 
         return self._request(
             "POST",
