@@ -51,4 +51,4 @@ USER django
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "if [ \"${APP_MODE:-web}\" = \"worker\" ]; then exec python manage.py bulk_worker; else python manage.py migrate --noinput && exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-3} --timeout ${GUNICORN_TIMEOUT:-120} --access-logfile - --error-logfile -; fi"]
+CMD ["sh", "-c", "if [ \"${APP_MODE:-web}\" = \"worker\" ]; then exec python manage.py bulk_worker; else python manage.py migrate --noinput && exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-3} --timeout ${GUNICORN_TIMEOUT:-120} --access-logfile - --error-logfile - --no-control-socket; fi"]
