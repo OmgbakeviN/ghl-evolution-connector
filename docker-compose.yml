@@ -1,0 +1,79 @@
+# GHL Evolution Connector - Production Docker Compose
+
+x-common-environment: &common-environment
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+  DEBUG: ${DEBUG:-False}
+  DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-ghlconnector.smartsana.com}
+  DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-https://ghlconnector.smartsana.com}
+
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${DB_NAME}
+  DB_USER: ${DB_USER}
+  DB_PASSWORD: ${DB_PASSWORD}
+
+  GHL_CLIENT_ID: ${GHL_CLIENT_ID}
+  GHL_CLIENT_SECRET: ${GHL_CLIENT_SECRET}
+  GHL_SHARED_SECRET: ${GHL_SHARED_SECRET}
+  GHL_API_VERSION: ${GHL_API_VERSION:-v3}
+  GHL_REDIRECT_URI: ${GHL_REDIRECT_URI}
+  GHL_CONVERSATION_PROVIDER_ID: ${GHL_CONVERSATION_PROVIDER_ID}
+
+  EVOLUTION_API_URL: ${EVOLUTION_API_URL}
+  EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+
+  APP_PUBLIC_URL: ${APP_PUBLIC_URL}
+
+  BULK_MESSAGE_INTERVAL_SECONDS: ${BULK_MESSAGE_INTERVAL_SECONDS:-5}
+  BULK_WORKER_IDLE_SECONDS: ${BULK_WORKER_IDLE_SECONDS:-2}
+
+services:
+  web:
+    image: ghl-evolution-connector:production
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    init: true
+    environment:
+      <<: *common-environment
+      APP_MODE: web
+      PORT: ${PORT:-8000}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-3}
+      GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
+    expose:
+      - "8000"
+    volumes:
+      - media_data:/app/media
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket; s=socket.create_connection(('127.0.0.1', 8000), 3); s.close()",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  worker:
+    image: ghl-evolution-connector:production
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    init: true
+    environment:
+      <<: *common-environment
+      APP_MODE: worker
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      web:
+        condition: service_healthy
+
+volumes:
+  media_data:
+    name: ghl_evolution_media
